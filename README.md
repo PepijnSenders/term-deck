@@ -29,13 +29,13 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 ### Via npm (Recommended)
 
 ```bash
-npm install -g @pepijnsenders/term-deck
+npm install -g @pep/term-deck
 ```
 
 Or with pnpm:
 
 ```bash
-pnpm install -g @pepijnsenders/term-deck
+pnpm install -g @pep/term-deck
 ```
 
 ### From Source

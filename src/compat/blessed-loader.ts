@@ -33,11 +33,12 @@ import listbar from 'neo-blessed/lib/widgets/listbar.js';
 import log from 'neo-blessed/lib/widgets/log.js';
 import table from 'neo-blessed/lib/widgets/table.js';
 import listtable from 'neo-blessed/lib/widgets/listtable.js';
-import terminal from 'neo-blessed/lib/widgets/terminal.js';
-import image from 'neo-blessed/lib/widgets/image.js';
-import ansiimage from 'neo-blessed/lib/widgets/ansiimage.js';
-import overlayimage from 'neo-blessed/lib/widgets/overlayimage.js';
-import video from 'neo-blessed/lib/widgets/video.js';
+// Skip terminal, image, video - they have optional dependencies we don't need
+// import terminal from 'neo-blessed/lib/widgets/terminal.js';
+// import image from 'neo-blessed/lib/widgets/image.js';
+// import ansiimage from 'neo-blessed/lib/widgets/ansiimage.js';
+// import overlayimage from 'neo-blessed/lib/widgets/overlayimage.js';
+// import video from 'neo-blessed/lib/widgets/video.js';
 import layout from 'neo-blessed/lib/widgets/layout.js';
 
 // Import blessed
@@ -73,15 +74,16 @@ blessed.Listbar = blessed.listbar = listbar;
 blessed.Log = blessed.log = log;
 blessed.Table = blessed.table = table;
 blessed.ListTable = blessed.listtable = listtable;
-blessed.Terminal = blessed.terminal = terminal;
-blessed.Image = blessed.image = image;
-blessed.ANSIImage = blessed.ansiimage = ansiimage;
-blessed.OverlayImage = blessed.overlayimage = overlayimage;
-blessed.Video = blessed.video = video;
+// Skip terminal, image, video - they have optional dependencies
+// blessed.Terminal = blessed.terminal = terminal;
+// blessed.Image = blessed.image = image;
+// blessed.ANSIImage = blessed.ansiimage = ansiimage;
+// blessed.OverlayImage = blessed.overlayimage = overlayimage;
+// blessed.Video = blessed.video = video;
 blessed.Layout = blessed.layout = layout;
 
 // Aliases
 blessed.ListBar = blessed.Listbar;
-blessed.PNG = blessed.ANSIImage;
+// blessed.PNG = blessed.ANSIImage;
 
 export default blessed;

@@ -19,23 +19,23 @@ THEME=$1
 case $THEME in
   matrix)
     echo "🟢 Launching MATRIX theme..."
-    bun bin/term-deck.ts slides-matrix/
+    bun bin/term-deck.ts examples/slides-matrix/
     ;;
   neon)
     echo "💗 Launching NEON theme..."
-    bun bin/term-deck.ts slides-neon/
+    bun bin/term-deck.ts examples/slides-neon/
     ;;
   retro)
     echo "🌆 Launching RETRO theme..."
-    bun bin/term-deck.ts slides-retro/
+    bun bin/term-deck.ts examples/slides-retro/
     ;;
   minimal)
     echo "⚪ Launching MINIMAL theme..."
-    bun bin/term-deck.ts slides-minimal/
+    bun bin/term-deck.ts examples/slides-minimal/
     ;;
   hacker)
     echo "💚 Launching HACKER theme..."
-    bun bin/term-deck.ts slides-hacker/
+    bun bin/term-deck.ts examples/slides-hacker/
     ;;
   *)
     echo "Unknown theme: $THEME"

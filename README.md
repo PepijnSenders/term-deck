@@ -31,7 +31,7 @@ cd term-deck
 bun install
 
 # Run a presentation
-bun bin/term-deck.ts slides-matrix/
+bun bin/term-deck.ts examples/slides-matrix/
 ```
 
 ## Quick Start
@@ -269,7 +269,13 @@ term-deck/
 │   ├── schemas/              # Zod validation schemas
 │   └── themes/               # Built-in themes
 ├── themes/                   # User custom themes
-├── slides-*/                 # Example presentations
+├── examples/                 # Example presentations
+│   ├── slides/               # Default demo
+│   ├── slides-matrix/        # Matrix theme demo
+│   ├── slides-neon/          # Neon theme demo
+│   ├── slides-retro/         # Retro theme demo
+│   ├── slides-minimal/       # Minimal theme demo
+│   └── slides-hacker/        # Hacker theme demo
 └── package.json
 ```
 

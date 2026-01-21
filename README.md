@@ -24,7 +24,7 @@ Requires [Bun](https://bun.sh) to be installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/term-deck.git
+git clone https://github.com/PepijnSenders/term-deck.git
 cd term-deck
 
 # Install dependencies
@@ -38,7 +38,7 @@ bun bin/term-deck.ts slides-matrix/
 
 ### Run the Demo
 
-Try out the included spec-machine presentation in different themes:
+Try out the included demo presentation in different themes:
 
 ```bash
 # Matrix theme (default)

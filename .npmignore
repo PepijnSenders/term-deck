@@ -7,3 +7,7 @@ bun.lock
 *.test.ts
 __tests__/
 visual-test-deck/
+src/
+bin/
+tsconfig.json
+pnpm-lock.yaml

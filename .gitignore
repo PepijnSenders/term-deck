@@ -49,3 +49,6 @@ temp/
 Thumbs.db
 .DS_Store
 token-setup.txt
+
+# Build output
+dist/

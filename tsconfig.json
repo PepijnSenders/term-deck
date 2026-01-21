@@ -4,6 +4,11 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "baseUrl": ".",
     "types": ["node"],
     "strict": false,
@@ -22,6 +27,7 @@
   ],
   "exclude": [
     "node_modules",
+    "dist",
     "**/*.test.ts",
     "**/__tests__/**"
   ]

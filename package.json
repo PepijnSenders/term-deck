@@ -59,6 +59,7 @@
     "canvas": "^3.2.1"
   },
   "devDependencies": {
+    "@tsconfig/bun": "^1.0.7",
     "@types/bun": "latest",
     "@types/figlet": "^1.5.8",
     "typescript": "^5.9.3"

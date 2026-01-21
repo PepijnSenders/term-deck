@@ -29,7 +29,8 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 ### Via Homebrew (Recommended)
 
 ```bash
-brew install PepijnSenders/tap/term-deck
+brew tap PepijnSenders/tap
+brew install term-deck
 ```
 
 ### From Source

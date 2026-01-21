@@ -30,6 +30,7 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 
 ```bash
 brew tap PepijnSenders/tap
+brew update
 brew install term-deck
 ```
 

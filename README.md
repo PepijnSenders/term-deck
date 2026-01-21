@@ -6,6 +6,12 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## Demo
+
+![term-deck demo](./demo.gif)
+
+*Matrix rain backgrounds, glitch animations, and ASCII art in your terminal*
+
 ## Features
 
 - 🌊 **Matrix Rain Background** - Animated katakana/symbol rain effects

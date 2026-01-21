@@ -26,12 +26,16 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 
 ## Installation
 
-### Via Homebrew (Recommended)
+### Via npm (Recommended)
 
 ```bash
-brew tap PepijnSenders/tap
-brew update
-brew install term-deck
+npm install -g term-deck
+```
+
+Or with bun:
+
+```bash
+bun install -g term-deck
 ```
 
 ### From Source

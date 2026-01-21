@@ -1,4 +1,4 @@
-import blessed from '../compat/blessed-loader.js';
+import blessed from 'neo-blessed';
 import type { Deck } from '../core/slide.js';
 import type { Renderer } from '../renderer/screen.js';
 import { loadDeck } from '../core/slide.js';
@@ -477,7 +477,7 @@ async function findAvailableTty(): Promise<string> {
  * ```
  */
 async function createNotesWindow(ttyPath?: string): Promise<NotesWindow> {
-  const blessed = (await import('../compat/blessed-loader.js')).default;
+  const blessed = (await import('neo-blessed')).default;
   const { openSync } = await import('node:fs');
 
   // If no TTY specified, try to find one

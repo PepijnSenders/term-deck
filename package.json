@@ -1,6 +1,6 @@
 {
   "name": "term-deck",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Terminal presentation tool with a cyberpunk aesthetic",
   "type": "module",
   "bin": {
@@ -11,8 +11,41 @@
   "scripts": {
     "dev": "bun run bin/term-deck.ts",
     "test": "bun test src/",
-    "typecheck": "bun tsc --noEmit"
+    "typecheck": "bun tsc --noEmit",
+    "prepublishOnly": "bun run typecheck"
   },
+  "keywords": [
+    "presentation",
+    "terminal",
+    "slides",
+    "cli",
+    "tui",
+    "blessed",
+    "cyberpunk",
+    "markdown"
+  ],
+  "author": "Pepijn Senders",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PepijnSenders/term-deck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PepijnSenders/term-deck/issues"
+  },
+  "homepage": "https://github.com/PepijnSenders/term-deck#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "themes/",
+    "examples/",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "commander": "^14.0.2",
     "neo-blessed": "^0.2.0",

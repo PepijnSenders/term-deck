@@ -1,7 +1,0 @@
-[build]
-target = "bun"
-sourcemap = "none"
-minify = true
-
-[install]
-cache = false

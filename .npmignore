@@ -1,0 +1,9 @@
+.github/
+.claude/
+node_modules/
+bun.lock
+.gitignore
+.DS_Store
+*.test.ts
+__tests__/
+visual-test-deck/

@@ -78,8 +78,13 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Update Homebrew Tap
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
-          git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/PepijnSenders/homebrew-tap.git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git clone https://github.com/PepijnSenders/homebrew-tap.git
           cd homebrew-tap
 
           # Download the darwin-arm64 tarball to calculate SHA256
@@ -120,8 +125,8 @@ jobs:
           end
           EOF
 
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
           git add Formula/term-deck.rb
           git commit -m "Update term-deck to v${{ steps.version.outputs.VERSION }}"
-          git push
+
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/PepijnSenders/homebrew-tap.git
+          git push origin main

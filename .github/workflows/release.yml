@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin-x64
+            artifact: term-deck-darwin-x64
+          - os: macos-latest
+            target: darwin-arm64
+            artifact: term-deck-darwin-arm64
+          - os: ubuntu-latest
+            target: linux-x64
+            artifact: term-deck-linux-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build binary
+        run: |
+          bun build ./bin/term-deck.ts --compile --target=bun-${{ matrix.target }} --outfile=${{ matrix.artifact }}
+          chmod +x ${{ matrix.artifact }}
+
+      - name: Create tarball
+        run: |
+          tar -czf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update Homebrew Tap
+        run: |
+          git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/PepijnSenders/homebrew-tap.git
+          cd homebrew-tap
+
+          # Download the darwin-arm64 tarball to calculate SHA256
+          DARWIN_ARM64_URL="https://github.com/PepijnSenders/term-deck/releases/download/v${{ steps.version.outputs.VERSION }}/term-deck-darwin-arm64.tar.gz"
+          curl -sL "$DARWIN_ARM64_URL" -o term-deck-darwin-arm64.tar.gz
+          DARWIN_ARM64_SHA=$(shasum -a 256 term-deck-darwin-arm64.tar.gz | awk '{print $1}')
+
+          # Download the darwin-x64 tarball to calculate SHA256
+          DARWIN_X64_URL="https://github.com/PepijnSenders/term-deck/releases/download/v${{ steps.version.outputs.VERSION }}/term-deck-darwin-x64.tar.gz"
+          curl -sL "$DARWIN_X64_URL" -o term-deck-darwin-x64.tar.gz
+          DARWIN_X64_SHA=$(shasum -a 256 term-deck-darwin-x64.tar.gz | awk '{print $1}')
+
+          # Create or update Formula
+          cat > Formula/term-deck.rb << EOF
+          class TermDeck < Formula
+            desc "Terminal presentation tool with cyberpunk aesthetic"
+            homepage "https://github.com/PepijnSenders/term-deck"
+            version "${{ steps.version.outputs.VERSION }}"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "$DARWIN_ARM64_URL"
+                sha256 "$DARWIN_ARM64_SHA"
+              else
+                url "$DARWIN_X64_URL"
+                sha256 "$DARWIN_X64_SHA"
+              end
+            end
+
+            def install
+              bin.install "term-deck-darwin-arm64" => "term-deck" if Hardware::CPU.arm?
+              bin.install "term-deck-darwin-x64" => "term-deck" if Hardware::CPU.intel?
+            end
+
+            test do
+              system "#{bin}/term-deck", "--version"
+            end
+          end
+          EOF
+
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Formula/term-deck.rb
+          git commit -m "Update term-deck to v${{ steps.version.outputs.VERSION }}"
+          git push

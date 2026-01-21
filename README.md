@@ -26,41 +26,60 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 
 ## Installation
 
+### Via Homebrew (Recommended)
+
+```bash
+brew install PepijnSenders/tap/term-deck
+```
+
+### From Source
+
 Requires [Bun](https://bun.sh) to be installed.
 
 ```bash
-# Clone the repository
 git clone https://github.com/PepijnSenders/term-deck.git
 cd term-deck
-
-# Install dependencies
 bun install
-
-# Run a presentation
 bun bin/term-deck.ts examples/slides-matrix/
 ```
 
 ## Quick Start
 
-### Run the Demo
-
-Try out the included demo presentation in different themes:
+### Create Your First Presentation
 
 ```bash
-# Matrix theme (default)
-./run-theme.sh matrix
+# Initialize a new deck
+term-deck init my-presentation
 
-# Neon cyberpunk
-./run-theme.sh neon
+# Navigate and present
+cd my-presentation
+term-deck slides/
+```
 
-# 80s retro synthwave
-./run-theme.sh retro
+This creates:
+```
+my-presentation/
+├── slides/
+│   ├── 01-intro.md
+│   ├── 02-content.md
+│   ├── 03-end.md
+│   └── deck.config.ts
+└── README.md
+```
 
-# Clean minimal
-./run-theme.sh minimal
+### Try the Examples
 
-# Classic hacker terminal
-./run-theme.sh hacker
+```bash
+# Clone the repo to see examples
+git clone https://github.com/PepijnSenders/term-deck.git
+cd term-deck
+
+# Try different themes
+term-deck examples/slides-matrix/   # Classic Matrix
+term-deck examples/slides-neon/     # Cyberpunk neon
+term-deck examples/slides-retro/    # 80s synthwave
+term-deck examples/slides-minimal/  # Clean monochrome
+term-deck examples/slides-hacker/   # Terminal green
 ```
 
 ### Keyboard Controls
@@ -69,20 +88,13 @@ Try out the included demo presentation in different themes:
 |-----|--------|
 | `Space` / `Enter` / `→` | Next slide |
 | `←` / `Backspace` | Previous slide |
-| `0-9` | Jump to slide (0-9) |
+| `0-9` | Jump to slide |
 | `l` | Show slide list |
 | `q` / `Esc` | Quit |
 
-## Creating Your First Deck
+## Slide Format
 
-### 1. Create a slides directory
-
-```bash
-mkdir my-presentation
-cd my-presentation
-```
-
-### 2. Add markdown slides
+Each slide is a markdown file with YAML frontmatter:
 
 **01-intro.md**
 ```markdown

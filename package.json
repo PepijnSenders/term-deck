@@ -1,0 +1,33 @@
+{
+  "name": "term-deck",
+  "version": "1.0.0",
+  "description": "Terminal presentation tool with a cyberpunk aesthetic",
+  "type": "module",
+  "bin": {
+    "term-deck": "./bin/term-deck.ts"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "dev": "bun run bin/term-deck.ts",
+    "test": "bun test src/",
+    "typecheck": "bun tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "neo-blessed": "^0.2.0",
+    "figlet": "^1.9.4",
+    "gradient-string": "^3.0.0",
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.7.0",
+    "zod": "^3.22.4",
+    "deepmerge": "^4.3.1",
+    "mermaid-ascii": "^1.0.0",
+    "canvas": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/figlet": "^1.5.8",
+    "typescript": "^5.9.3"
+  }
+}

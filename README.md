@@ -1,0 +1,326 @@
+# term-deck
+
+A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful slideshows in your terminal with matrix rain backgrounds, glitch effects, and ASCII art.
+
+![term-deck demo](https://img.shields.io/badge/bun-ready-pink?logo=bun)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+## Features
+
+- 🌊 **Matrix Rain Background** - Animated katakana/symbol rain effects
+- ✨ **Glitch Reveal Animations** - Line-by-line scramble effects
+- 🎨 **5 Built-in Themes** - Matrix, Neon, Retro, Minimal, Hacker
+- 📝 **Markdown Slides** - One file per slide, easy to version control
+- 🎯 **Figlet ASCII Art** - Big text rendered with figlet
+- 🎭 **Custom Gradients** - Color gradients for headings
+- 🔧 **Fully Themeable** - Create custom themes with YAML
+- ⚡ **Fast** - Built with Bun for instant startup
+- 📦 **Type-Safe** - Full TypeScript with Zod validation
+
+## Installation
+
+Requires [Bun](https://bun.sh) to be installed.
+
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/term-deck.git
+cd term-deck
+
+# Install dependencies
+bun install
+
+# Run a presentation
+bun bin/term-deck.ts slides-matrix/
+```
+
+## Quick Start
+
+### Run the Demo
+
+Try out the included spec-machine presentation in different themes:
+
+```bash
+# Matrix theme (default)
+./run-theme.sh matrix
+
+# Neon cyberpunk
+./run-theme.sh neon
+
+# 80s retro synthwave
+./run-theme.sh retro
+
+# Clean minimal
+./run-theme.sh minimal
+
+# Classic hacker terminal
+./run-theme.sh hacker
+```
+
+### Keyboard Controls
+
+| Key | Action |
+|-----|--------|
+| `Space` / `Enter` / `→` | Next slide |
+| `←` / `Backspace` | Previous slide |
+| `0-9` | Jump to slide (0-9) |
+| `l` | Show slide list |
+| `q` / `Esc` | Quit |
+
+## Creating Your First Deck
+
+### 1. Create a slides directory
+
+```bash
+mkdir my-presentation
+cd my-presentation
+```
+
+### 2. Add markdown slides
+
+**01-intro.md**
+```markdown
+---
+title: Welcome
+bigText: HELLO
+gradient: fire
+---
+
+{GREEN}Welcome to my presentation!{/}
+
+This is the body text of the slide.
+```
+
+**02-content.md**
+```markdown
+---
+title: Main Point
+bigText:
+  - MULTI
+  - LINE
+gradient: cool
+---
+
+{WHITE}You can have multiple bigText lines.{/}
+
+{CYAN}And use color tokens for styling.{/}
+```
+
+### 3. Add a config file
+
+**deck.config.ts**
+```typescript
+import { defineConfig } from 'term-deck';
+import matrix from 'term-deck/themes/matrix';
+
+export default defineConfig({
+  title: 'My Presentation',
+  author: 'Your Name',
+  theme: matrix,
+  settings: {
+    startSlide: 0,
+    loop: false,
+    showProgress: false,
+  },
+});
+```
+
+### 4. Run it
+
+```bash
+bun path/to/term-deck/bin/term-deck.ts .
+```
+
+## Themes
+
+term-deck includes 5 built-in themes. See [THEMES.md](./THEMES.md) for detailed documentation.
+
+### Quick Comparison
+
+| Theme | Palette | Speed | Best For |
+|-------|---------|-------|----------|
+| **Matrix** | Green/Orange | Normal | All-purpose, classic cyberpunk |
+| **Neon** | Pink/Cyan/Purple | Fast | High energy, product launches |
+| **Retro** | Pink/Orange/Purple | Slow | Creative talks, storytelling |
+| **Minimal** | Monochrome | Very Slow | Corporate, documentation |
+| **Hacker** | All Green | Very Fast | Security talks, live coding |
+
+### Creating Custom Themes
+
+Create a theme file in `themes/`:
+
+**themes/my-theme.ts**
+```typescript
+import { createTheme } from '../src/core/theme.js';
+
+const yaml = `
+name: my-theme
+description: My custom theme
+
+colors:
+  primary: "#ff0000"
+  accent: "#00ff00"
+  background: "#000000"
+  text: "#ffffff"
+  muted: "#666666"
+
+gradients:
+  fire:
+    - "#ff0000"
+    - "#ff6600"
+    - "#ffcc00"
+  cool:
+    - "#0000ff"
+    - "#0066ff"
+    - "#00ccff"
+  pink:
+    - "#ff00ff"
+    - "#ff66ff"
+    - "#ffccff"
+  hf:
+    - "#00ff00"
+    - "#66ff66"
+    - "#ccffcc"
+
+glyphs: "█▓▒░▀▄▌▐■□▪▫"
+
+animations:
+  revealSpeed: 1.0
+  matrixDensity: 50
+  glitchIterations: 5
+  lineDelay: 30
+  matrixInterval: 80
+
+window:
+  borderStyle: line
+  shadow: true
+  padding:
+    top: 1
+    bottom: 1
+    left: 2
+    right: 2
+`;
+
+export default createTheme(yaml);
+```
+
+Then use it in your deck config:
+
+```typescript
+import myTheme from './themes/my-theme.js';
+
+export default defineConfig({
+  title: 'My Presentation',
+  theme: myTheme,
+});
+```
+
+## Slide Format
+
+Slides use markdown with YAML frontmatter:
+
+```markdown
+---
+title: Slide Title
+bigText: BIG TEXT
+gradient: fire
+transition: glitch
+---
+
+Body content goes here.
+
+You can use color tokens:
+{GREEN}green text{/}
+{ORANGE}orange text{/}
+{CYAN}cyan text{/}
+{PINK}pink text{/}
+{WHITE}white text{/}
+{GRAY}gray text{/}
+
+<!-- notes -->
+These are presenter notes (optional).
+Only visible in notes mode.
+```
+
+### Frontmatter Options
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | string | Window title (required) |
+| `bigText` | string \| string[] | ASCII art text via figlet |
+| `gradient` | string | Gradient for bigText: `fire`, `cool`, `pink`, `hf` |
+| `transition` | string | Animation: `glitch`, `fade`, `instant`, `typewriter` |
+| `theme` | string | Override theme for this slide |
+
+## Development
+
+### Project Structure
+
+```
+term-deck/
+├── bin/
+│   └── term-deck.ts          # CLI entry point
+├── src/
+│   ├── cli/                  # CLI commands
+│   ├── core/                 # Core logic (deck, slide, theme)
+│   ├── renderer/             # TUI rendering
+│   ├── presenter/            # Presentation controller
+│   ├── export/               # Export to GIF/MP4 (future)
+│   ├── schemas/              # Zod validation schemas
+│   └── themes/               # Built-in themes
+├── themes/                   # User custom themes
+├── slides-*/                 # Example presentations
+└── package.json
+```
+
+### Running Tests
+
+```bash
+bun run test
+```
+
+### Type Checking
+
+```bash
+bun run typecheck
+```
+
+## Roadmap
+
+- [ ] Export to GIF/MP4
+- [ ] Presenter notes mode (dual terminal)
+- [ ] Mermaid diagram support
+- [ ] Custom fonts for ASCII art
+- [ ] Auto-advance mode
+- [ ] Progress bar
+- [ ] Remote control (via HTTP)
+- [ ] Web viewer
+
+## Why term-deck?
+
+- **For speakers** who want terminal-native presentations
+- **For developers** who want to present code without context switching
+- **For streamers** who want a cyberpunk aesthetic
+- **For anyone** tired of PowerPoint
+
+## Credits
+
+Built with:
+- [Bun](https://bun.sh) - Fast JavaScript runtime
+- [neo-blessed](https://github.com/embarklabs/neo-blessed) - Terminal UI
+- [figlet](https://github.com/patorjk/figlet.js) - ASCII art text
+- [gradient-string](https://github.com/bokub/gradient-string) - Color gradients
+- [Zod](https://github.com/colinhacks/zod) - Schema validation
+
+Inspired by:
+- [Slidev](https://sli.dev) - Presentation slides for developers
+- [mdp](https://github.com/visit1985/mdp) - Markdown presentation tool
+- [present](https://github.com/vinayak-mehta/present) - Terminal presentation tool
+
+## License
+
+MIT License - see [LICENSE](./LICENSE) for details.
+
+---
+
+Made with 💚 by the term-deck team

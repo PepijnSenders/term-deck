@@ -21,7 +21,7 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 - 🎯 **Figlet ASCII Art** - Big text rendered with figlet
 - 🎭 **Custom Gradients** - Color gradients for headings
 - 🔧 **Fully Themeable** - Create custom themes with YAML
-- ⚡ **Fast** - Built with Bun for instant startup
+- ⚡ **Fast** - Instant startup with minimal dependencies
 - 📦 **Type-Safe** - Full TypeScript with Zod validation
 
 ## Installation
@@ -32,21 +32,21 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 npm install -g term-deck
 ```
 
-Or with bun:
+Or with pnpm:
 
 ```bash
-bun install -g term-deck
+pnpm install -g term-deck
 ```
 
 ### From Source
 
-Requires [Bun](https://bun.sh) to be installed.
+Requires [Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io).
 
 ```bash
 git clone https://github.com/PepijnSenders/term-deck.git
 cd term-deck
-bun install
-bun bin/term-deck.ts examples/slides-matrix/
+pnpm install
+pnpm dev examples/slides-matrix/
 ```
 
 ## Quick Start
@@ -336,7 +336,7 @@ bun run typecheck
 ## Credits
 
 Built with:
-- [Bun](https://bun.sh) - Fast JavaScript runtime
+- [Node.js](https://nodejs.org) - JavaScript runtime
 - [neo-blessed](https://github.com/embarklabs/neo-blessed) - Terminal UI
 - [figlet](https://github.com/patorjk/figlet.js) - ASCII art text
 - [gradient-string](https://github.com/bokub/gradient-string) - Color gradients

@@ -1,16 +1,20 @@
 {
-  "extends": "@tsconfig/bun/tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
     "baseUrl": ".",
-    "types": ["bun"],
+    "types": ["node"],
     "strict": false,
     "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "noImplicitAny": false,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",

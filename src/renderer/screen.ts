@@ -1,4 +1,4 @@
-import blessed from 'neo-blessed'
+import blessed from '../compat/blessed-loader.js'
 import figlet from 'figlet'
 import gradient from 'gradient-string'
 import type { Theme } from '../schemas/theme.js'

@@ -33,7 +33,11 @@ jobs:
 
       - name: Build binary
         run: |
-          bun build ./bin/term-deck.ts --compile --target=bun-${{ matrix.target }} --outfile=${{ matrix.artifact }}
+          bun build ./bin/term-deck.ts \
+            --compile \
+            --target=bun-${{ matrix.target }} \
+            --outfile=${{ matrix.artifact }} \
+            --sourcemap=none
           chmod +x ${{ matrix.artifact }}
 
       - name: Create tarball

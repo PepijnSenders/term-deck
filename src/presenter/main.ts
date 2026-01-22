@@ -1,4 +1,5 @@
 import blessed from 'neo-blessed';
+import { access } from 'fs/promises';
 import type { Deck } from '../core/slide.js';
 import type { Renderer } from '../renderer/screen.js';
 import { loadDeck } from '../core/slide.js';
@@ -440,10 +441,8 @@ async function findAvailableTty(): Promise<string> {
 
   for (const tty of candidates) {
     try {
-      const file = Bun.file(tty);
-      if (await file.exists()) {
-        return tty;
-      }
+      await access(tty);
+      return tty;
     } catch {
       // Continue to next candidate
     }

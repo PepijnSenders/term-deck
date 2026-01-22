@@ -5,6 +5,9 @@
  * to video (MP4) or GIF formats.
  */
 
+import { writeFile, unlink } from 'fs/promises';
+import { execa } from 'execa';
+
 /**
  * Export options
  */
@@ -370,7 +373,7 @@ export async function saveFrame(
   const frameNum = session.frameCount.toString().padStart(6, '0')
   const framePath = join(session.tempDir, `frame_${frameNum}.png`)
 
-  await Bun.write(framePath, png)
+  await writeFile(framePath, png)
   session.frameCount++
 }
 
@@ -389,8 +392,7 @@ export async function cleanupSession(session: RecordingSession): Promise<void> {
  */
 export async function checkFfmpeg(): Promise<void> {
   try {
-    const { $ } = await import('bun')
-    await $`which ffmpeg`.quiet()
+    await execa('which', ['ffmpeg'])
   } catch {
     throw new Error(
       'ffmpeg not found. Install it with:\n' +
@@ -447,12 +449,18 @@ async function encodeMp4(
   fps: number,
   quality: number
 ): Promise<void> {
-  const { $ } = await import('bun')
-
   // CRF: 0 = lossless, 51 = worst. ~18-23 is good quality
   const crf = Math.round(51 - (quality / 100) * 33)
 
-  await $`ffmpeg -y -framerate ${fps} -i ${input} -c:v libx264 -crf ${crf} -pix_fmt yuv420p ${output}`
+  await execa('ffmpeg', [
+    '-y',
+    '-framerate', fps.toString(),
+    '-i', input,
+    '-c:v', 'libx264',
+    '-crf', crf.toString(),
+    '-pix_fmt', 'yuv420p',
+    output
+  ])
 }
 
 /**
@@ -463,7 +471,6 @@ async function encodeGif(
   output: string,
   fps: number
 ): Promise<void> {
-  const { $ } = await import('bun')
   const { tmpdir } = await import('os')
   const { join } = await import('path')
 
@@ -472,14 +479,27 @@ async function encodeGif(
 
   try {
     // Pass 1: Generate palette
-    await $`ffmpeg -y -framerate ${fps} -i ${input} -vf "fps=${fps},scale=-1:-1:flags=lanczos,palettegen=stats_mode=diff" ${paletteFile}`
+    await execa('ffmpeg', [
+      '-y',
+      '-framerate', fps.toString(),
+      '-i', input,
+      '-vf', `fps=${fps},scale=-1:-1:flags=lanczos,palettegen=stats_mode=diff`,
+      paletteFile
+    ])
 
     // Pass 2: Encode with palette
-    await $`ffmpeg -y -framerate ${fps} -i ${input} -i ${paletteFile} -lavfi "fps=${fps},scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" ${output}`
+    await execa('ffmpeg', [
+      '-y',
+      '-framerate', fps.toString(),
+      '-i', input,
+      '-i', paletteFile,
+      '-lavfi', `fps=${fps},scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
+      output
+    ])
   } finally {
     // Cleanup palette
     try {
-      await Bun.file(paletteFile).delete()
+      await unlink(paletteFile)
     } catch {
       // Ignore
     }
@@ -629,7 +649,7 @@ export async function recordAnsi(
       lines.push(JSON.stringify(frame))
     }
 
-    await Bun.write(output, lines.join('\n') + '\n')
+    await writeFile(output, lines.join('\n') + '\n')
 
     console.log(`Recorded to ${output}`)
     console.log(`Play with: asciinema play ${output}`)

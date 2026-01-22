@@ -1,6 +1,7 @@
 import matter from 'gray-matter'
 import { join } from 'path'
-import { Glob } from 'bun'
+import fg from 'fast-glob'
+import { readFile, access } from 'fs/promises'
 import { mermaidToAscii as convertMermaid } from 'mermaid-ascii'
 import type { Slide } from '../schemas/slide.js'
 import type { DeckConfig } from '../schemas/config.js'
@@ -275,7 +276,7 @@ export async function parseSlide(
   index: number
 ): Promise<Slide> {
   // Read file content
-  const content = await Bun.file(filePath).text()
+  const content = await readFile(filePath, 'utf-8')
 
   // Parse frontmatter with gray-matter
   const { data, content: rawBody } = matter(content)
@@ -314,18 +315,22 @@ export async function parseSlide(
  * @returns Array of SlideFile objects sorted by filename
  */
 export async function findSlideFiles(dir: string): Promise<SlideFile[]> {
-  const glob = new Glob('*.md')
+  const pattern = join(dir, '*.md')
+  const foundFiles = await fg(pattern, { onlyFiles: true })
+
   const files: SlideFile[] = []
 
-  for await (const file of glob.scan(dir)) {
+  for (const filePath of foundFiles) {
+    const name = filePath.split('/').pop() || ''
+
     // Skip non-slide files
-    if (file === 'README.md' || file.startsWith('_')) {
+    if (name === 'README.md' || name.startsWith('_')) {
       continue
     }
 
     files.push({
-      path: join(dir, file),
-      name: file,
+      path: filePath,
+      name,
       index: 0, // Will be set after sorting
     })
   }
@@ -357,9 +362,10 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
 
   try {
     // Check if config file exists
-    const configFile = Bun.file(configPath)
-    if (!(await configFile.exists())) {
-      // Return default config with DEFAULT_THEME
+    try {
+      await access(configPath)
+    } catch {
+      // File doesn't exist, return default config with DEFAULT_THEME
       return {
         theme: DEFAULT_THEME,
       }

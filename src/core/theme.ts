@@ -1,6 +1,7 @@
 import { parse as parseYaml } from 'yaml'
 import deepmerge from 'deepmerge'
 import gradient from 'gradient-string'
+import { readFile, access } from 'fs/promises'
 import type { Theme, PartialTheme } from '../schemas/theme'
 import { ThemeSchema } from '../schemas/theme'
 import { safeParse, ValidationError } from '../schemas/validation'
@@ -193,14 +194,13 @@ export function createTheme(yaml: string): ThemeObject {
  * const customTheme = theme.extend({ colors: { primary: '#ff0066' } })
  */
 export async function loadThemeFromFile(path: string): Promise<ThemeObject> {
-  const file = Bun.file(path)
-  const exists = await file.exists()
-
-  if (!exists) {
+  try {
+    await access(path)
+  } catch {
     throw new Error(`Theme file not found: ${path}`)
   }
 
-  const content = await file.text()
+  const content = await readFile(path, 'utf-8')
   return createTheme(content)
 }
 

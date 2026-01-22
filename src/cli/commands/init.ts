@@ -6,6 +6,7 @@
 
 import { Command } from 'commander';
 import { join } from 'node:path';
+import { mkdir, writeFile } from 'fs/promises';
 import { handleError } from '../errors.js';
 
 export const initCommand = new Command('init')
@@ -35,7 +36,8 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   const slidesDir = join(deckDir, 'slides');
 
   // Create directories
-  await Bun.write(join(slidesDir, '.gitkeep'), '');
+  await mkdir(slidesDir, { recursive: true });
+  await writeFile(join(slidesDir, '.gitkeep'), '');
 
   // Create deck.config.ts
   const configContent = `import { defineConfig } from 'term-deck'
@@ -46,7 +48,7 @@ export default defineConfig({
   theme: matrix,
 })
 `;
-  await Bun.write(join(slidesDir, 'deck.config.ts'), configContent);
+  await writeFile(join(slidesDir, 'deck.config.ts'), configContent);
 
   // Create sample slides
   const slide1 = `---
@@ -87,9 +89,9 @@ gradient: pink
 Press {CYAN}q{/} to exit
 `;
 
-  await Bun.write(join(slidesDir, '01-intro.md'), slide1);
-  await Bun.write(join(slidesDir, '02-content.md'), slide2);
-  await Bun.write(join(slidesDir, '03-end.md'), slide3);
+  await writeFile(join(slidesDir, '01-intro.md'), slide1);
+  await writeFile(join(slidesDir, '02-content.md'), slide2);
+  await writeFile(join(slidesDir, '03-end.md'), slide3);
 
   // Create README
   const readme = `# ${name}
@@ -121,5 +123,5 @@ term-deck export slides/ -o ${name}.gif
 | q | Quit |
 `;
 
-  await Bun.write(join(deckDir, 'README.md'), readme);
+  await writeFile(join(deckDir, 'README.md'), readme);
 }

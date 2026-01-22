@@ -18,7 +18,7 @@ import { generateBigText, generateMultiLineBigText } from './text-generator.js'
 
 // Re-export for backwards compatibility
 export { type TransitionType, applyTransition } from './animations/transitions.js'
-export { type WindowOptions } from './window-manager.js'
+export { type WindowOptions, getWindowColor } from './window-manager.js'
 export { generateBigText, generateMultiLineBigText } from './text-generator.js'
 export { type RenderedContent } from './slide-renderer.js'
 
@@ -48,7 +48,7 @@ export interface Renderer {
  * @param title - Window title (defaults to 'term-deck')
  * @returns Configured blessed screen instance
  */
-function createScreen(title: string = 'term-deck'): blessed.Widgets.Screen {
+export function createScreen(title: string = 'term-deck'): blessed.Widgets.Screen {
   const screen = blessed.screen({
     smartCSR: true,
     title,

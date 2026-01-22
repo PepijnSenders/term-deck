@@ -110,7 +110,7 @@ function cleanup(presenter: Presenter): void {
  * @param presenter - The presenter state
  * @returns Timer object if auto-advance is enabled, null otherwise
  */
-function startAutoAdvance(presenter: Presenter): NodeJS.Timer | null {
+function startAutoAdvance(presenter: Presenter): ReturnType<typeof setInterval> | null {
   const interval = presenter.deck.config.settings?.autoAdvance;
 
   // Auto-advance disabled if interval is undefined, 0, or negative
@@ -134,7 +134,7 @@ function startAutoAdvance(presenter: Presenter): NodeJS.Timer | null {
  *
  * @param timer - The timer to stop (can be null)
  */
-function stopAutoAdvance(timer: NodeJS.Timer | null): void {
+function stopAutoAdvance(timer: ReturnType<typeof setInterval> | null): void {
   if (timer) {
     clearInterval(timer);
   }

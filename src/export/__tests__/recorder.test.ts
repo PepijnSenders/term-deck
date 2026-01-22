@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { captureScreen, createRecordingSession, saveFrame, cleanupSession, checkFfmpeg, detectFormat, exportPresentation } from '../recorder'
+import { createRecordingSession, saveFrame, cleanupSession, checkFfmpeg, detectFormat, exportPresentation } from '../recorder'
+import { captureScreen } from '../capture/screen-capture'
 import type { RecordingSession } from '../recorder'
 import { VirtualTerminal } from '../utils/virtual-terminal'
 import { ansi256ToHex } from '../utils/color-conversion'

@@ -21,7 +21,7 @@ export interface Presenter {
   currentSlide: number;
   isAnimating: boolean;
   notesWindow: NotesWindow | null;
-  autoAdvanceTimer: NodeJS.Timer | null;
+  autoAdvanceTimer: ReturnType<typeof setInterval> | null;
   progressBar: blessed.Widgets.ProgressBarElement | null;
 }
 

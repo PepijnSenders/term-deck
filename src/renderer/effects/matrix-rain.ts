@@ -1,4 +1,4 @@
-import type blessed from 'neo-blessed'
+import blessed from 'neo-blessed'
 import type { Theme } from '../../schemas/theme.js'
 
 /**
@@ -26,7 +26,7 @@ export interface MatrixRainState {
   /** Array of matrix rain drops for animation */
   matrixDrops: MatrixDrop[]
   /** Interval timer for matrix rain animation (null if stopped) */
-  matrixInterval: NodeJS.Timer | null
+  matrixInterval: ReturnType<typeof setInterval> | null
   /** Active theme for rendering */
   theme: Theme
 }

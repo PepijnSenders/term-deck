@@ -117,7 +117,7 @@ describe('CLI help text', () => {
   test('main program would have name', () => {
     const pkg = require('../../../package.json');
     expect(pkg.name).toBeTruthy();
-    expect(pkg.name).toBe('term-deck');
+    expect(pkg.name).toBe('@pep/term-deck');
   });
 
   test('all commands have help text', () => {

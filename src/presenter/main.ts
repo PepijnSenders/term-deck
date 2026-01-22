@@ -1,9 +1,15 @@
 import blessed from 'neo-blessed';
-import { access } from 'fs/promises';
 import type { Deck } from '../core/slide.js';
 import type { Renderer } from '../renderer/screen.js';
 import { loadDeck } from '../core/slide.js';
 import { createRenderer, destroyRenderer, renderSlide, clearWindows } from '../renderer/screen.js';
+import {
+  createNotesWindow,
+  updateNotesWindow as updateNotesContent,
+  toggleNotesVisibility,
+  destroyNotesWindow,
+  type NotesWindow,
+} from './notes-window.js';
 
 /**
  * Presenter state
@@ -27,17 +33,6 @@ export interface Presenter {
   progressBar: blessed.Widgets.ProgressBarElement | null;
 }
 
-/**
- * Notes window state (separate terminal)
- *
- * Represents a secondary display on a different TTY for presenter notes.
- * Shows current slide notes, slide number, and preview of next slide.
- */
-export interface NotesWindow {
-  screen: blessed.Widgets.Screen;
-  contentBox: blessed.Widgets.BoxElement;
-  tty: string; // TTY device path (e.g., '/dev/tty2')
-}
 
 /**
  * Presentation options
@@ -139,7 +134,7 @@ export async function present(
 function cleanup(presenter: Presenter): void {
   stopAutoAdvance(presenter.autoAdvanceTimer);
   if (presenter.notesWindow) {
-    presenter.notesWindow.screen.destroy();
+    destroyNotesWindow(presenter.notesWindow);
   }
   destroyRenderer(presenter.renderer);
 }
@@ -162,7 +157,14 @@ async function showSlide(presenter: Presenter, index: number): Promise<void> {
 
   // Update notes window
   if (presenter.notesWindow) {
-    updateNotesWindow(presenter);
+    const nextSlide = presenter.deck.slides[index + 1];
+    updateNotesContent(
+      presenter.notesWindow,
+      slide,
+      nextSlide,
+      index,
+      presenter.deck.slides.length
+    );
   }
 
   // Update progress bar
@@ -225,7 +227,15 @@ export async function prevSlide(presenter: Presenter): Promise<void> {
 
       // Update notes window
       if (presenter.notesWindow) {
-        updateNotesWindow(presenter);
+        const currentSlide = slides[slides.length - 1];
+        const nextSlide = undefined;
+        updateNotesContent(
+          presenter.notesWindow,
+          currentSlide,
+          nextSlide,
+          slides.length - 1,
+          slides.length
+        );
       }
 
       // Update progress bar
@@ -249,7 +259,15 @@ export async function prevSlide(presenter: Presenter): Promise<void> {
 
   // Update notes window
   if (presenter.notesWindow) {
-    updateNotesWindow(presenter);
+    const currentSlide = slides[prevIndex];
+    const nextSlide = slides[prevIndex + 1];
+    updateNotesContent(
+      presenter.notesWindow,
+      currentSlide,
+      nextSlide,
+      prevIndex,
+      slides.length
+    );
   }
 
   // Update progress bar
@@ -290,7 +308,15 @@ export async function jumpToSlide(presenter: Presenter, index: number): Promise<
 
   // Update notes window if present
   if (presenter.notesWindow) {
-    updateNotesWindow(presenter);
+    const currentSlide = presenter.deck.slides[index];
+    const nextSlide = presenter.deck.slides[index + 1];
+    updateNotesContent(
+      presenter.notesWindow,
+      currentSlide,
+      nextSlide,
+      index,
+      presenter.deck.slides.length
+    );
   }
 
   // Update progress bar
@@ -407,165 +433,6 @@ function showSlideList(presenter: Presenter): void {
   });
 }
 
-/**
- * Toggle notes window visibility
- *
- * Toggles the visibility of the notes window between shown and hidden.
- *
- * @param notesWindow - The notes window to toggle
- */
-function toggleNotesVisibility(notesWindow: NotesWindow): void {
-  const { contentBox, screen } = notesWindow;
-  contentBox.toggle();
-  screen.render();
-}
-
-/**
- * Find an available TTY for notes window
- *
- * This is a best-effort approach - user should specify with --notes-tty.
- * Searches common TTY paths on macOS and Linux.
- *
- * @returns Promise resolving to an available TTY path
- * @throws Error if no available TTY is found
- */
-async function findAvailableTty(): Promise<string> {
-  // On macOS, try common TTY paths
-  const candidates = [
-    '/dev/ttys001',
-    '/dev/ttys002',
-    '/dev/ttys003',
-    '/dev/pts/1',
-    '/dev/pts/2',
-  ];
-
-  for (const tty of candidates) {
-    try {
-      await access(tty);
-      return tty;
-    } catch {
-      // Continue to next candidate
-    }
-  }
-
-  throw new Error(
-    'Could not find available TTY for notes window. ' +
-    'Open a second terminal, run `tty`, and pass the path with --notes-tty'
-  );
-}
-
-/**
- * Create notes window on a separate TTY
- *
- * Creates a blessed screen on a different TTY device for displaying presenter notes.
- * If no TTY is specified, attempts to find one automatically.
- *
- * Usage: Open a second terminal and run `tty` to get the device path,
- * then pass it with --notes-tty /dev/ttys001
- *
- * @param ttyPath - Optional TTY device path (e.g., '/dev/ttys001')
- * @returns Promise resolving to the created notes window
- *
- * @example
- * ```typescript
- * // With explicit TTY path
- * const notesWindow = await createNotesWindow('/dev/ttys001');
- *
- * // Auto-detect TTY
- * const notesWindow = await createNotesWindow();
- * ```
- */
-async function createNotesWindow(ttyPath?: string): Promise<NotesWindow> {
-  const blessed = (await import('neo-blessed')).default;
-  const { openSync } = await import('node:fs');
-
-  // If no TTY specified, try to find one
-  const tty = ttyPath ?? await findAvailableTty();
-
-  // Create screen on the specified TTY
-  const screen = blessed.screen({
-    smartCSR: true,
-    title: 'term-deck notes',
-    fullUnicode: true,
-    input: openSync(tty, 'r'),
-    output: openSync(tty, 'w'),
-  });
-
-  // Create content box
-  const contentBox = blessed.box({
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    tags: true,
-    padding: 2,
-    style: {
-      fg: '#ffffff',
-      bg: '#1a1a1a',
-    },
-  });
-
-  screen.append(contentBox);
-  screen.render();
-
-  return {
-    screen,
-    contentBox,
-    tty,
-  };
-}
-
-/**
- * Update notes window content for current slide
- *
- * Updates the notes window to display:
- * - Current slide number and title
- * - Presenter notes (or "No notes" if none exist)
- * - Preview of next slide title (or "Last slide" if at end)
- *
- * @param presenter - The presenter state
- */
-function updateNotesWindow(presenter: Presenter): void {
-  if (!presenter.notesWindow) return;
-
-  const { contentBox, screen } = presenter.notesWindow;
-  const { slides } = presenter.deck;
-  const currentIndex = presenter.currentSlide;
-  const currentSlide = slides[currentIndex];
-  const nextSlide = slides[currentIndex + 1];
-
-  // Build notes content
-  let content = '';
-
-  // Header
-  content += `{bold}Slide ${currentIndex + 1} of ${slides.length}{/bold}\n`;
-  content += `{gray-fg}${currentSlide.frontmatter.title}{/}\n`;
-  content += '\n';
-  content += '─'.repeat(50) + '\n';
-  content += '\n';
-
-  // Notes
-  if (currentSlide.notes) {
-    content += '{bold}PRESENTER NOTES:{/bold}\n\n';
-    content += currentSlide.notes + '\n';
-  } else {
-    content += '{gray-fg}No notes for this slide{/}\n';
-  }
-
-  content += '\n';
-  content += '─'.repeat(50) + '\n';
-  content += '\n';
-
-  // Next slide preview
-  if (nextSlide) {
-    content += `{bold}NEXT:{/bold} "${nextSlide.frontmatter.title}"\n`;
-  } else {
-    content += '{gray-fg}Last slide{/}\n';
-  }
-
-  contentBox.setContent(content);
-  screen.render();
-}
 
 /**
  * Start auto-advance timer

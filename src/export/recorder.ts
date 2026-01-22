@@ -7,6 +7,7 @@
 
 import { writeFile, unlink } from 'fs/promises';
 import { execa } from 'execa';
+import { hexToAnsi256, ansi256ToHex, extractColor } from './utils/color-conversion.js';
 
 /**
  * Export options
@@ -265,78 +266,6 @@ export function captureScreenAsAnsi(screen: any): string {
   return output.join('')
 }
 
-/**
- * Convert hex color to ANSI 256-color escape sequence
- */
-function hexToAnsi256(hex: string): string {
-  // Parse hex color
-  const r = Number.parseInt(hex.slice(1, 3), 16)
-  const g = Number.parseInt(hex.slice(3, 5), 16)
-  const b = Number.parseInt(hex.slice(5, 7), 16)
-
-  // Convert to 256-color palette
-  // Use 216-color cube (16-231)
-  const rIndex = Math.round(r / 51)
-  const gIndex = Math.round(g / 51)
-  const bIndex = Math.round(b / 51)
-
-  const colorCode = 16 + (rIndex * 36) + (gIndex * 6) + bIndex
-
-  // Return ANSI escape sequence for foreground color
-  return `\x1b[38;5;${colorCode}m`
-}
-
-/**
- * Extract hex color from blessed attribute
- */
-function extractColor(attr: any): string | null {
-  if (!attr) return null
-
-  // blessed stores fg color in attr.fg
-  if (typeof attr === 'object' && attr.fg !== undefined) {
-    // Could be number (256 color) or string (hex)
-    if (typeof attr.fg === 'string' && attr.fg.startsWith('#')) {
-      return attr.fg
-    }
-    // Convert 256 color to hex
-    if (typeof attr.fg === 'number') {
-      return ansi256ToHex(attr.fg)
-    }
-  }
-
-  return null
-}
-
-/**
- * Convert ANSI 256 color to hex
- */
-export function ansi256ToHex(code: number): string {
-  // Standard 16 colors
-  const standard16 = [
-    '#000000', '#800000', '#008000', '#808000',
-    '#000080', '#800080', '#008080', '#c0c0c0',
-    '#808080', '#ff0000', '#00ff00', '#ffff00',
-    '#0000ff', '#ff00ff', '#00ffff', '#ffffff',
-  ]
-
-  if (code < 16) {
-    return standard16[code]
-  }
-
-  // 216 color cube (16-231)
-  if (code < 232) {
-    const n = code - 16
-    const r = Math.floor(n / 36) * 51
-    const g = Math.floor((n % 36) / 6) * 51
-    const b = (n % 6) * 51
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-  }
-
-  // Grayscale (232-255)
-  const gray = (code - 232) * 10 + 8
-  const hex = gray.toString(16).padStart(2, '0')
-  return `#${hex}${hex}${hex}`
-}
 
 /**
  * Create a new recording session

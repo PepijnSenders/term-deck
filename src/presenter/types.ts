@@ -1,5 +1,5 @@
 import blessed from 'neo-blessed';
-import type { Deck } from '../core/slide.js';
+import type { Deck } from '../core/deck-loader.js';
 import type { Renderer } from '../renderer/screen.js';
 import type { NotesWindow } from './notes-window.js';
 

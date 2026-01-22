@@ -95,24 +95,7 @@ export async function prevSlide(presenter: Presenter): Promise<void> {
       }
       presenter.currentSlide = slides.length - 1;
 
-      // Update notes window
-      if (presenter.notesWindow) {
-        const currentSlide = slides[slides.length - 1];
-        const nextSlide = undefined;
-        updateNotesWindow(
-          presenter.notesWindow,
-          currentSlide,
-          nextSlide,
-          slides.length - 1,
-          slides.length
-        );
-      }
-
-      // Update progress bar
-      if (presenter.progressBar) {
-        updateProgress(presenter.progressBar, presenter.currentSlide, presenter.deck.slides.length);
-      }
-
+      updateUIComponents(presenter, slides.length - 1);
       presenter.renderer.screen.render();
     }
     // If not looping, stay at current slide (index 0)
@@ -127,25 +110,7 @@ export async function prevSlide(presenter: Presenter): Promise<void> {
 
   presenter.currentSlide = prevIndex;
 
-  // Update notes window
-  if (presenter.notesWindow) {
-    const currentSlide = slides[prevIndex];
-    const nextSlide = slides[prevIndex + 1];
-    updateNotesWindow(
-      presenter.notesWindow,
-      currentSlide,
-      nextSlide,
-      prevIndex,
-      slides.length
-    );
-  }
-
-  // Update progress bar
-  if (presenter.progressBar) {
-    updateProgress(presenter.progressBar, presenter.currentSlide, presenter.deck.slides.length);
-  }
-
-  // Render screen to display changes
+  updateUIComponents(presenter, prevIndex);
   presenter.renderer.screen.render();
 }
 
@@ -173,28 +138,9 @@ export async function jumpToSlide(presenter: Presenter, index: number): Promise<
     await renderSlide(presenter.renderer, presenter.deck.slides[i]);
   }
 
-  // Update current slide
   presenter.currentSlide = index;
 
-  // Update notes window if present
-  if (presenter.notesWindow) {
-    const currentSlide = presenter.deck.slides[index];
-    const nextSlide = presenter.deck.slides[index + 1];
-    updateNotesWindow(
-      presenter.notesWindow,
-      currentSlide,
-      nextSlide,
-      index,
-      presenter.deck.slides.length
-    );
-  }
-
-  // Update progress bar
-  if (presenter.progressBar) {
-    updateProgress(presenter.progressBar, presenter.currentSlide, presenter.deck.slides.length);
-  }
-
-  // Render screen to display changes
+  updateUIComponents(presenter, index);
   presenter.renderer.screen.render();
 }
 
@@ -215,4 +161,33 @@ export function updateProgress(
 ): void {
   const progress = ((current + 1) / total) * 100;
   progressBar.setProgress(progress);
+}
+
+/**
+ * Update UI components after slide change
+ *
+ * Updates the notes window and progress bar to reflect the current slide.
+ * This centralizes the UI update logic used by navigation functions.
+ *
+ * @param presenter - The presenter state
+ * @param currentIndex - Current slide index (0-based)
+ */
+function updateUIComponents(presenter: Presenter, currentIndex: number): void {
+  const { slides } = presenter.deck;
+  const currentSlide = slides[currentIndex];
+  const nextSlide = slides[currentIndex + 1];
+
+  if (presenter.notesWindow) {
+    updateNotesWindow(
+      presenter.notesWindow,
+      currentSlide,
+      nextSlide,
+      currentIndex,
+      slides.length
+    );
+  }
+
+  if (presenter.progressBar) {
+    updateProgress(presenter.progressBar, currentIndex, slides.length);
+  }
 }

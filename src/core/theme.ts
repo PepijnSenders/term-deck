@@ -103,8 +103,6 @@ export function createTheme(yaml: string): ThemeObject {
 
 // Re-export commonly used functions for convenience
 export { ThemeError, formatThemeError } from './theme-errors'
-export { loadThemeFromFile, loadThemeFromPackage } from './theme-loaders'
-export type { ThemePackage } from './theme-loaders'
 export {
   createGradients,
   applyGradient,

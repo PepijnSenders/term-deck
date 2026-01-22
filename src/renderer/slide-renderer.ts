@@ -1,7 +1,7 @@
 import blessed from 'neo-blessed'
 import type { Theme } from '../schemas/theme.js'
 import type { Slide } from '../schemas/slide.js'
-import { normalizeBigText, processSlideContent } from '../core/slide.js'
+import { normalizeBigText, processSlideContent } from '../core/content-processor.js'
 import { applyTransition } from './animations/transitions.js'
 import { generateMultiLineBigText } from './text-generator.js'
 import { createWindow } from './window-manager.js'

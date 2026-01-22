@@ -1,5 +1,5 @@
 import blessed from 'neo-blessed';
-import { loadDeck } from '../core/slide.js';
+import { loadDeck } from '../core/deck-loader.js';
 import { createRenderer, destroyRenderer } from '../renderer/screen.js';
 import { createNotesWindow, destroyNotesWindow } from './notes-window.js';
 import { setupControls } from './keyboard-controls.js';

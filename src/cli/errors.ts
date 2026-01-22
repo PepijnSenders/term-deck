@@ -6,7 +6,8 @@
  */
 
 import { ValidationError } from '../schemas/validation.js';
-import { SlideParseError, DeckLoadError } from '../core/slide.js';
+import { SlideParseError } from '../core/slide.js';
+import { DeckLoadError } from '../core/deck-loader.js';
 import { ThemeError } from '../core/theme.js';
 
 /**

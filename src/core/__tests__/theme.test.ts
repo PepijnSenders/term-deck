@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import {
   createTheme,
-  loadThemeFromFile,
-  loadThemeFromPackage,
   createGradients,
   applyGradient,
   BUILTIN_COLORS,
@@ -11,6 +9,7 @@ import {
   ThemeError,
   formatThemeError,
 } from '../theme'
+import { loadThemeFromFile, loadThemeFromPackage } from '../theme-loaders'
 import { ValidationError } from '../../schemas/validation'
 import { join } from 'path'
 import { mkdtemp, rm } from 'fs/promises'

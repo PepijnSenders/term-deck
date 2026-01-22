@@ -3,13 +3,12 @@ import {
   getWindowColor,
   createWindow,
   clearWindows,
-  renderMatrixRain,
-  initMatrixRain,
   applyTransition,
   renderSlide,
   createRenderer,
   destroyRenderer,
 } from '../screen'
+import { renderMatrixRain, initMatrixRain } from '../effects/matrix-rain'
 import { DEFAULT_THEME } from '../../schemas/theme'
 import type { Slide } from '../../schemas/slide'
 

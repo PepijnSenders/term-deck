@@ -5,10 +5,10 @@
  * to video (MP4) or GIF formats.
  */
 
-import { writeFile, unlink } from 'fs/promises';
-import { execa } from 'execa';
-import { hexToAnsi256, ansi256ToHex, extractColor } from './utils/color-conversion.js';
+import { writeFile } from 'fs/promises';
+import { hexToAnsi256, extractColor } from './utils/color-conversion.js';
 import { VirtualTerminal } from './utils/virtual-terminal.js';
+import { checkFfmpeg, detectFormat, encodeVideo, type ExportFormat } from './encoding/ffmpeg-encoder.js';
 
 /**
  * Export options
@@ -30,8 +30,9 @@ export interface ExportOptions {
 
 /**
  * Export format
+ * Re-exported from ffmpeg-encoder for backwards compatibility
  */
-export type ExportFormat = 'mp4' | 'gif'
+export type { ExportFormat } from './encoding/ffmpeg-encoder.js';
 
 /**
  * Asciicast v2 format header
@@ -215,123 +216,37 @@ export async function cleanupSession(session: RecordingSession): Promise<void> {
 
 /**
  * Check if ffmpeg is available
- *
- * Throws an error with installation instructions if ffmpeg is not found
+ * Re-exported from ffmpeg-encoder for backwards compatibility
  */
-export async function checkFfmpeg(): Promise<void> {
-  try {
-    await execa('which', ['ffmpeg'])
-  } catch {
-    throw new Error(
-      'ffmpeg not found. Install it with:\n' +
-      '  macOS: brew install ffmpeg\n' +
-      '  Ubuntu: sudo apt install ffmpeg'
-    )
-  }
-}
+export { checkFfmpeg } from './encoding/ffmpeg-encoder.js';
 
 /**
  * Detect export format from filename
- *
- * Checks the file extension and returns the corresponding export format.
- * Throws an error if the extension is not recognized.
- *
- * @param output - The output file path
- * @returns The export format ('mp4' or 'gif')
- * @throws Error if the file extension is not .mp4 or .gif
+ * Re-exported from ffmpeg-encoder for backwards compatibility
  */
-export function detectFormat(output: string): ExportFormat {
-  if (output.endsWith('.gif')) return 'gif'
-  if (output.endsWith('.mp4')) return 'mp4'
-
-  throw new Error(
-    `Unknown output format for ${output}. Use .mp4 or .gif extension.`
-  )
-}
+export { detectFormat } from './encoding/ffmpeg-encoder.js';
 
 /**
  * Encode frames to video using ffmpeg
+ *
+ * Delegates to the ffmpeg-encoder module to handle the actual encoding.
  */
-async function encodeVideo(
+async function encodeToVideo(
   session: RecordingSession,
   output: string,
   format: ExportFormat,
   quality?: number
 ): Promise<void> {
-  const { join } = await import('path')
-  const inputPattern = join(session.tempDir, 'frame_%06d.png')
+  const { join } = await import('path');
+  const inputPattern = join(session.tempDir, 'frame_%06d.png');
 
-  if (format === 'mp4') {
-    await encodeMp4(inputPattern, output, session.fps, quality ?? 80)
-  } else {
-    await encodeGif(inputPattern, output, session.fps)
-  }
-}
-
-/**
- * Encode to MP4
- */
-async function encodeMp4(
-  input: string,
-  output: string,
-  fps: number,
-  quality: number
-): Promise<void> {
-  // CRF: 0 = lossless, 51 = worst. ~18-23 is good quality
-  const crf = Math.round(51 - (quality / 100) * 33)
-
-  await execa('ffmpeg', [
-    '-y',
-    '-framerate', fps.toString(),
-    '-i', input,
-    '-c:v', 'libx264',
-    '-crf', crf.toString(),
-    '-pix_fmt', 'yuv420p',
-    output
-  ])
-}
-
-/**
- * Encode to GIF
- */
-async function encodeGif(
-  input: string,
-  output: string,
-  fps: number
-): Promise<void> {
-  const { tmpdir } = await import('os')
-  const { join } = await import('path')
-
-  // Two-pass encoding for better quality GIF
-  const paletteFile = join(tmpdir(), `palette-${Date.now()}.png`)
-
-  try {
-    // Pass 1: Generate palette
-    await execa('ffmpeg', [
-      '-y',
-      '-framerate', fps.toString(),
-      '-i', input,
-      '-vf', `fps=${fps},scale=-1:-1:flags=lanczos,palettegen=stats_mode=diff`,
-      paletteFile
-    ])
-
-    // Pass 2: Encode with palette
-    await execa('ffmpeg', [
-      '-y',
-      '-framerate', fps.toString(),
-      '-i', input,
-      '-i', paletteFile,
-      '-lavfi', `fps=${fps},scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
-      output
-    ])
-  } finally {
-    // Cleanup palette
-    try {
-      await unlink(paletteFile)
-    } catch {
-      // Ignore
-    }
-  }
+  await encodeVideo({
+    inputPattern,
+    output,
+    format,
+    fps: session.fps,
+    quality
+  });
 }
 
 /**
@@ -398,7 +313,7 @@ export async function exportPresentation(
 
     // Encode video
     console.log('Encoding video...')
-    await encodeVideo(session, options.output, format, options.quality)
+    await encodeToVideo(session, options.output, format, options.quality)
 
     console.log(`Exported to ${options.output}`)
   } finally {

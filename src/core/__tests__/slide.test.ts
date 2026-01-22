@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test'
-import { extractNotes, parseSlide, findSlideFiles, loadDeckConfig, loadDeck, hasMermaidDiagrams, extractMermaidBlocks, mermaidToAscii, formatMermaidError, processMermaidDiagrams, normalizeBigText } from '../slide'
+import { extractNotes, parseSlide, findSlideFiles, loadDeckConfig, loadDeck, normalizeBigText } from '../slide'
+import { hasMermaidDiagrams, extractMermaidBlocks, mermaidToAscii, formatMermaidError, processMermaidDiagrams } from '../utils/mermaid'
 import { DEFAULT_THEME } from '../../schemas/theme'
 import { join } from 'path'
 import { rmSync, mkdirSync } from 'fs'

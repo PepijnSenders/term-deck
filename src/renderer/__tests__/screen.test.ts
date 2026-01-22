@@ -5,16 +5,14 @@ import {
   destroyRenderer,
   generateBigText,
   generateMultiLineBigText,
-  lineByLineReveal,
-  glitchLine,
   getWindowColor,
   createWindow,
   clearWindows,
-  renderMatrixRain,
-  initMatrixRain,
   applyTransition,
   renderSlide,
 } from '../screen'
+import { renderMatrixRain, initMatrixRain } from '../effects/matrix-rain'
+import { lineByLineReveal, glitchLine } from '../animations/transitions'
 import { DEFAULT_THEME } from '../../schemas/theme'
 import type { Slide } from '../../schemas/slide'
 

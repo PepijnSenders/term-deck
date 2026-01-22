@@ -1,5 +1,6 @@
 import { describe, it, expect, mock, spyOn } from 'bun:test';
-import { jumpToSlide, nextSlide, prevSlide } from '../main';
+import { jumpToSlide } from '../main';
+import { nextSlide, prevSlide } from '../navigation';
 import type { Presenter } from '../main';
 import { createRenderer, destroyRenderer } from '../../renderer/screen';
 import { DEFAULT_THEME } from '../../schemas/theme';

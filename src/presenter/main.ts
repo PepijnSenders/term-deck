@@ -8,6 +8,9 @@ import type { Presenter, PresentOptions } from './types.js';
 
 export type { Presenter, PresentOptions };
 
+// Re-export navigation functions for backwards compatibility
+export { jumpToSlide, prevSlide } from './navigation.js';
+
 /**
  * Start a presentation
  *

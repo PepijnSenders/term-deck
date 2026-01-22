@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { VirtualTerminal, captureScreen, createRecordingSession, saveFrame, cleanupSession, checkFfmpeg, detectFormat, exportPresentation, ansi256ToHex } from '../recorder'
+import { captureScreen, createRecordingSession, saveFrame, cleanupSession, checkFfmpeg, detectFormat, exportPresentation } from '../recorder'
 import type { RecordingSession } from '../recorder'
+import { VirtualTerminal } from '../utils/virtual-terminal'
+import { ansi256ToHex } from '../utils/color-conversion'
 import { readdir, stat, rm } from 'fs/promises'
 
 describe('VirtualTerminal', () => {

@@ -4,6 +4,12 @@ import gradient from 'gradient-string'
 import type { Theme } from '../schemas/theme.js'
 import type { Slide } from '../schemas/slide.js'
 import { normalizeBigText, processSlideContent } from '../core/slide.js'
+import {
+  type MatrixRainState,
+  createMatrixBox,
+  initMatrixRain,
+  stopMatrixRain,
+} from './effects/matrix-rain.js'
 
 /**
  * Main renderer state.
@@ -12,31 +18,12 @@ import { normalizeBigText, processSlideContent } from '../core/slide.js'
 export interface Renderer {
   /** The blessed screen instance */
   screen: blessed.Widgets.Screen
-  /** Box element for matrix rain background */
-  matrixBox: blessed.Widgets.BoxElement
   /** Stack of window elements (slides render on top of each other) */
   windowStack: blessed.Widgets.BoxElement[]
   /** Active theme for rendering */
   theme: Theme
-  /** Array of matrix rain drops for animation */
-  matrixDrops: MatrixDrop[]
-  /** Interval timer for matrix rain animation (null if stopped) */
-  matrixInterval: NodeJS.Timer | null
-}
-
-/**
- * Matrix rain drop.
- * Represents a single falling column of glyphs in the matrix background.
- */
-export interface MatrixDrop {
-  /** Horizontal position (column) */
-  x: number
-  /** Vertical position (row, can be fractional for smooth animation) */
-  y: number
-  /** Fall speed (rows per animation frame) */
-  speed: number
-  /** Array of glyph characters forming the drop's trail */
-  trail: string[]
+  /** Matrix rain animation state */
+  matrixRain: MatrixRainState
 }
 
 /**
@@ -94,104 +81,6 @@ export function createScreen(title: string = 'term-deck'): blessed.Widgets.Scree
   return screen
 }
 
-/**
- * Generate a trail of random glyphs.
- * Randomly selects glyphs from the theme's glyph set to form a drop trail.
- *
- * @param glyphs - String of available glyphs to choose from
- * @param length - Number of characters in the trail
- * @returns Array of random glyph characters
- */
-function generateTrail(glyphs: string, length: number): string[] {
-  return Array.from({ length }, () =>
-    glyphs[Math.floor(Math.random() * glyphs.length)]
-  )
-}
-
-/**
- * Render one frame of matrix rain.
- * Updates the matrix background with falling glyph trails.
- * This function is called repeatedly by the animation interval.
- *
- * @param renderer - The renderer instance to update
- */
-export function renderMatrixRain(renderer: Renderer): void {
-  const { screen, matrixBox, matrixDrops, theme } = renderer
-  const width = Math.max(20, (screen.width as number) || 80)
-  const height = Math.max(10, (screen.height as number) || 24)
-
-  // Create grid for positioning characters
-  const grid: string[][] = Array.from({ length: height }, () =>
-    Array(width).fill(' ')
-  )
-
-  // Update and render drops
-  for (const drop of matrixDrops) {
-    drop.y += drop.speed
-
-    // Reset if off screen
-    if (drop.y > height + drop.trail.length) {
-      drop.y = -drop.trail.length
-      drop.x = Math.floor(Math.random() * width)
-    }
-
-    // Draw trail
-    for (let i = 0; i < drop.trail.length; i++) {
-      const y = Math.floor(drop.y) - i
-      if (y >= 0 && y < height && drop.x < width) {
-        grid[y][drop.x] = drop.trail[i]
-      }
-    }
-  }
-
-  // Convert grid to string with colors
-  let output = ''
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const char = grid[y][x]
-      if (char !== ' ') {
-        const brightness = Math.random() > 0.7 ? '{bold}' : ''
-        output += `${brightness}{${theme.colors.primary}-fg}${char}{/}`
-      } else {
-        output += ' '
-      }
-    }
-    if (y < height - 1) output += '\n'
-  }
-
-  matrixBox.setContent(output)
-}
-
-/**
- * Initialize matrix rain drops.
- * Creates the initial set of drops and starts the animation loop.
- * This is called automatically by createRenderer.
- *
- * @param renderer - The renderer instance to initialize
- */
-export function initMatrixRain(renderer: Renderer): void {
-  const { screen, theme } = renderer
-  const width = (screen.width as number) || 80
-  const height = (screen.height as number) || 24
-  const density = theme.animations.matrixDensity
-
-  renderer.matrixDrops = []
-
-  for (let i = 0; i < density; i++) {
-    renderer.matrixDrops.push({
-      x: Math.floor(Math.random() * width),
-      y: Math.floor(Math.random() * height),
-      speed: 0.3 + Math.random() * 0.7,
-      trail: generateTrail(theme.glyphs, 5 + Math.floor(Math.random() * 10)),
-    })
-  }
-
-  // Start animation loop
-  renderer.matrixInterval = setInterval(() => {
-    renderMatrixRain(renderer)
-    renderer.screen.render()
-  }, theme.animations.matrixInterval)
-}
 
 /**
  * Create the renderer with all components.
@@ -205,26 +94,24 @@ export function createRenderer(theme: Theme): Renderer {
   const screen = createScreen()
 
   // Create matrix background box covering full screen
-  const matrixBox = blessed.box({
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    tags: true,
-  })
-  screen.append(matrixBox)
+  const matrixBox = createMatrixBox(screen)
+
+  const matrixRain: MatrixRainState = {
+    matrixBox,
+    matrixDrops: [],
+    matrixInterval: null,
+    theme,
+  }
 
   const renderer: Renderer = {
     screen,
-    matrixBox,
     windowStack: [],
     theme,
-    matrixDrops: [],
-    matrixInterval: null,
+    matrixRain,
   }
 
   // Initialize matrix rain
-  initMatrixRain(renderer)
+  initMatrixRain(screen, matrixRain)
 
   return renderer
 }
@@ -237,11 +124,8 @@ export function createRenderer(theme: Theme): Renderer {
  * @param renderer - The renderer instance to destroy
  */
 export function destroyRenderer(renderer: Renderer): void {
-  // Clear matrix rain animation interval
-  if (renderer.matrixInterval) {
-    clearInterval(renderer.matrixInterval)
-    renderer.matrixInterval = null
-  }
+  // Stop matrix rain animation
+  stopMatrixRain(renderer.matrixRain)
 
   // Destroy all windows in the stack
   for (const win of renderer.windowStack) {

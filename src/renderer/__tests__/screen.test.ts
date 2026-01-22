@@ -49,12 +49,13 @@ describe('createRenderer', () => {
 
     expect(renderer).toBeDefined()
     expect(renderer.screen).toBeDefined()
-    expect(renderer.matrixBox).toBeDefined()
+    expect(renderer.matrixRain).toBeDefined()
+    expect(renderer.matrixRain.matrixBox).toBeDefined()
     expect(renderer.windowStack).toEqual([])
     expect(renderer.theme).toBe(DEFAULT_THEME)
-    expect(Array.isArray(renderer.matrixDrops)).toBe(true)
-    expect(renderer.matrixDrops.length).toBeGreaterThan(0)
-    expect(renderer.matrixInterval).toBeDefined()
+    expect(Array.isArray(renderer.matrixRain.matrixDrops)).toBe(true)
+    expect(renderer.matrixRain.matrixDrops.length).toBeGreaterThan(0)
+    expect(renderer.matrixRain.matrixInterval).toBeDefined()
 
     // Clean up
     destroyRenderer(renderer)
@@ -63,7 +64,7 @@ describe('createRenderer', () => {
   it('attaches matrix box to screen', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
-    expect(renderer.matrixBox.parent).toBe(renderer.screen)
+    expect(renderer.matrixRain.matrixBox.parent).toBe(renderer.screen)
 
     // Clean up
     destroyRenderer(renderer)
@@ -73,8 +74,8 @@ describe('createRenderer', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     // Matrix rain should be initialized (even if empty for now)
-    expect(renderer.matrixDrops).toBeDefined()
-    expect(Array.isArray(renderer.matrixDrops)).toBe(true)
+    expect(renderer.matrixRain.matrixDrops).toBeDefined()
+    expect(Array.isArray(renderer.matrixRain.matrixDrops)).toBe(true)
 
     // Clean up
     destroyRenderer(renderer)
@@ -86,20 +87,20 @@ describe('destroyRenderer', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     // Set up a mock interval
-    renderer.matrixInterval = setInterval(() => {}, 100) as NodeJS.Timer
+    renderer.matrixRain.matrixInterval = setInterval(() => {}, 100)
 
     destroyRenderer(renderer)
 
-    expect(renderer.matrixInterval).toBeNull()
+    expect(renderer.matrixRain.matrixInterval).toBeNull()
   })
 
   it('handles null matrix interval gracefully', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     // Clear the interval so it becomes null
-    if (renderer.matrixInterval) {
-      clearInterval(renderer.matrixInterval)
-      renderer.matrixInterval = null
+    if (renderer.matrixRain.matrixInterval) {
+      clearInterval(renderer.matrixRain.matrixInterval)
+      renderer.matrixRain.matrixInterval = null
     }
 
     // Should not throw when interval is null
@@ -157,7 +158,7 @@ describe('destroyRenderer', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     // Set up interval and windows
-    renderer.matrixInterval = setInterval(() => {}, 100) as NodeJS.Timer
+    renderer.matrixRain.matrixInterval = setInterval(() => {}, 100)
     const mockWindow = { destroy: mock(() => {}) }
     renderer.windowStack = [mockWindow as any]
     const screenDestroySpy = mock(() => {})
@@ -166,7 +167,7 @@ describe('destroyRenderer', () => {
     destroyRenderer(renderer)
 
     // Verify all cleanup steps occurred
-    expect(renderer.matrixInterval).toBeNull()
+    expect(renderer.matrixRain.matrixInterval).toBeNull()
     expect(mockWindow.destroy).toHaveBeenCalled()
     expect(renderer.windowStack).toEqual([])
     expect(screenDestroySpy).toHaveBeenCalled()

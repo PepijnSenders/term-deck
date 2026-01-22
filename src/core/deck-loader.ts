@@ -96,10 +96,11 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
     }
 
     // Dynamic import of TypeScript config
-    // Add cache buster to prevent module caching in tests
-    // Use both timestamp and random to ensure uniqueness even in rapid succession
-    const cacheBuster = `${Date.now()}-${Math.random()}`
-    const configModule = await import(configPath + '?t=' + cacheBuster)
+    // Add cache buster to prevent module caching in tests only
+    // In production, we want normal module caching behavior
+    const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
+    const cacheBuster = isTest ? `?t=${Date.now()}-${Math.random()}` : ''
+    const configModule = await import(configPath + cacheBuster)
 
     if (!configModule.default) {
       throw new Error('deck.config.ts must export default config')

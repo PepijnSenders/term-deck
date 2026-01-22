@@ -97,7 +97,9 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
 
     // Dynamic import of TypeScript config
     // Add cache buster to prevent module caching in tests
-    const configModule = await import(configPath + '?t=' + Date.now())
+    // Use both timestamp and random to ensure uniqueness even in rapid succession
+    const cacheBuster = `${Date.now()}-${Math.random()}`
+    const configModule = await import(configPath + '?t=' + cacheBuster)
 
     if (!configModule.default) {
       throw new Error('deck.config.ts must export default config')

@@ -76,8 +76,9 @@ describe('getWindowColor', () => {
 describe('createWindow', () => {
   // Helper to check if tests should run (blessed requires TTY-like environment)
   const isTTY = process.stdout.isTTY || process.env.TERM !== undefined
+  const skipIfNoTTY = !isTTY ? it.skip : it
 
-  it('creates a window with title', () => {
+  skipIfNoTTY('creates a window with title', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -97,7 +98,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('adds window to stack', () => {
+  skipIfNoTTY('adds window to stack', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -120,7 +121,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('attaches window to screen', () => {
+  skipIfNoTTY('attaches window to screen', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -135,7 +136,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('uses custom color when provided', () => {
+  skipIfNoTTY('uses custom color when provided', () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const customColor = '#ff00ff'
 
@@ -155,7 +156,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('uses theme-based color cycling when color not provided', () => {
+  skipIfNoTTY('uses theme-based color cycling when color not provided', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -174,7 +175,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('accepts custom dimensions', () => {
+  skipIfNoTTY('accepts custom dimensions', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -194,7 +195,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('accepts custom position', () => {
+  skipIfNoTTY('accepts custom position', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -214,7 +215,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('uses default dimensions when not provided', () => {
+  skipIfNoTTY('uses default dimensions when not provided', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -232,7 +233,7 @@ describe('createWindow', () => {
     }
   })
 
-  it('creates multiple stacked windows', () => {
+  skipIfNoTTY('creates multiple stacked windows', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -252,7 +253,10 @@ describe('createWindow', () => {
 })
 
 describe('clearWindows', () => {
-  it('destroys all windows in stack', () => {
+  const isTTY = process.stdout.isTTY || process.env.TERM !== undefined
+  const skipIfNoTTY = !isTTY ? it.skip : it
+
+  skipIfNoTTY('destroys all windows in stack', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     const mockWindow1 = { destroy: mock(() => {}) }
@@ -270,7 +274,7 @@ describe('clearWindows', () => {
     destroyRenderer(renderer)
   })
 
-  it('empties the window stack', () => {
+  skipIfNoTTY('empties the window stack', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {
@@ -292,7 +296,7 @@ describe('clearWindows', () => {
     }
   })
 
-  it('handles empty window stack', () => {
+  skipIfNoTTY('handles empty window stack', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     expect(renderer.windowStack.length).toBe(0)
@@ -303,7 +307,7 @@ describe('clearWindows', () => {
     destroyRenderer(renderer)
   })
 
-  it('can be called multiple times safely', () => {
+  skipIfNoTTY('can be called multiple times safely', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     try {

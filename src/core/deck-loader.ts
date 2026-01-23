@@ -128,7 +128,14 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
     }
 
     // Validate config against schema
-    return safeParse(DeckConfigSchema, configModule.default, configName)
+    const config = safeParse(DeckConfigSchema, configModule.default, configName)
+
+    // Ensure theme is always present (use DEFAULT_THEME if not specified)
+    if (!config.theme) {
+      config.theme = DEFAULT_THEME
+    }
+
+    return config
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
       // No config file found, use defaults

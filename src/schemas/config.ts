@@ -45,8 +45,8 @@ export const DeckConfigSchema = z.object({
   author: z.string().optional(),
   date: z.string().optional(),
 
-  // Theme (already validated Theme object)
-  theme: ThemeSchema,
+  // Theme (optional - uses DEFAULT_THEME if not specified)
+  theme: ThemeSchema.optional(),
 
   // Presentation settings
   settings: SettingsSchema.optional(),

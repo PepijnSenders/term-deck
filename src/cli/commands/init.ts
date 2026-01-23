@@ -8,7 +8,6 @@ import { Command } from 'commander';
 import { join } from 'node:path';
 import { mkdir, writeFile } from 'fs/promises';
 import { handleError } from '../errors.js';
-import { DEFAULT_THEME } from '../../schemas/theme.js';
 
 export const initCommand = new Command('init')
   .description('Create a new presentation deck')
@@ -40,22 +39,15 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   await mkdir(slidesDir, { recursive: true });
   await writeFile(join(slidesDir, '.gitkeep'), '');
 
-  // Create deck.config.js with valid default theme
-  // Use DEFAULT_THEME to ensure schema compliance
-  const themeJson = JSON.stringify(DEFAULT_THEME, null, 2)
-    .split('\n')
-    .map(line => '  ' + line)
-    .join('\n');
-
+  // Create deck.config.js that imports theme from package
   const configContent = `// Deck configuration
-// See: https://github.com/PepijnSenders/term-deck
+// Documentation: https://github.com/PepijnSenders/term-deck
+
+import { matrix } from '@pep/term-deck'
 
 export default {
   title: '${name}',
-
-  // Default matrix/cyberpunk theme
-  // Customize colors, gradients, and animations to your liking
-  theme: ${themeJson},
+  theme: matrix,
 }
 `;
   await writeFile(join(slidesDir, 'deck.config.js'), configContent);

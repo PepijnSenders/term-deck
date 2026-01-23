@@ -33,7 +33,7 @@ export { createTheme };
 export type { ThemeObject };
 
 // Re-export built-in themes
-export { default as matrix } from './themes/matrix/index.js';
+export { default as matrixTheme } from './themes/matrix/index.js';
 
 // Re-export types for consumers
 export type { DeckConfig, Theme, Slide, SlideFrontmatter };

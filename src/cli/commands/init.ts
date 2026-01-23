@@ -43,11 +43,11 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   const configContent = `// Deck configuration
 // Documentation: https://github.com/PepijnSenders/term-deck
 
-import { matrix } from '@pep/term-deck'
+import { matrixTheme } from '@pep/term-deck'
 
 export default {
   title: '${name}',
-  theme: matrix,
+  theme: matrixTheme,
 }
 `;
   await writeFile(join(slidesDir, 'deck.config.js'), configContent);

@@ -18,7 +18,7 @@ export const initCommand = new Command('init')
       await initDeck(name, options.theme);
       console.log(`Created deck: ${name}/`);
       console.log('\nNext steps:');
-      console.log(`  cd ${name}/slides`);
+      console.log(`  cd ${name}`);
       console.log('  term-deck present .');
     } catch (error) {
       handleError(error);
@@ -28,16 +28,14 @@ export const initCommand = new Command('init')
 /**
  * Initialize a new deck directory
  *
- * Creates the directory structure, configuration file, sample slides,
+ * Creates the directory, configuration file, sample slides,
  * and README for a new presentation deck.
  */
 export async function initDeck(name: string, theme: string): Promise<void> {
   const deckDir = join(process.cwd(), name);
-  const slidesDir = join(deckDir, 'slides');
 
-  // Create directories
-  await mkdir(slidesDir, { recursive: true });
-  await writeFile(join(slidesDir, '.gitkeep'), '');
+  // Create directory
+  await mkdir(deckDir, { recursive: true });
 
   // Create minimal deck.config.js
   const configContent = `// Deck configuration
@@ -68,7 +66,7 @@ export default {
   // },
 }
 `;
-  await writeFile(join(slidesDir, 'deck.config.js'), configContent);
+  await writeFile(join(deckDir, 'deck.config.js'), configContent);
 
   // Create sample slides
   const slide1 = `---
@@ -109,9 +107,9 @@ gradient: pink
 Press {CYAN}q{/} to exit
 `;
 
-  await writeFile(join(slidesDir, '01-intro.md'), slide1);
-  await writeFile(join(slidesDir, '02-content.md'), slide2);
-  await writeFile(join(slidesDir, '03-end.md'), slide3);
+  await writeFile(join(deckDir, '01-intro.md'), slide1);
+  await writeFile(join(deckDir, '02-content.md'), slide2);
+  await writeFile(join(deckDir, '03-end.md'), slide3);
 
   // Create README
   const readme = `# ${name}
@@ -121,15 +119,14 @@ A term-deck presentation.
 ## Usage
 
 \`\`\`bash
-cd slides
 term-deck present .
 \`\`\`
 
 ## Export
 
 \`\`\`bash
-term-deck export slides/ -o ${name}.mp4
-term-deck export slides/ -o ${name}.gif
+term-deck export . -o ${name}.mp4
+term-deck export . -o ${name}.gif
 \`\`\`
 
 ## Hotkeys

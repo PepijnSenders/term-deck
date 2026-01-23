@@ -45,7 +45,12 @@ export const DeckConfigSchema = z.object({
   author: z.string().optional(),
   date: z.string().optional(),
 
-  // Theme (optional - uses DEFAULT_THEME if not specified)
+  // Theme preset (optional - uses 'matrix' if not specified)
+  // Available presets: 'matrix'
+  themePreset: z.enum(['matrix']).optional(),
+
+  // Theme object (optional - for advanced customization)
+  // If both themePreset and theme are specified, theme takes precedence
   theme: ThemeSchema.optional(),
 
   // Presentation settings

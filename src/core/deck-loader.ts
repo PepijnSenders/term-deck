@@ -130,9 +130,16 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
     // Validate config against schema
     const config = safeParse(DeckConfigSchema, configModule.default, configName)
 
-    // Ensure theme is always present (use DEFAULT_THEME if not specified)
+    // Resolve theme from preset or use DEFAULT_THEME
     if (!config.theme) {
-      config.theme = DEFAULT_THEME
+      // Map of available theme presets
+      const themePresets: Record<string, typeof DEFAULT_THEME> = {
+        matrix: DEFAULT_THEME,
+      }
+
+      // Use themePreset if specified, otherwise default to 'matrix'
+      const presetName = config.themePreset || 'matrix'
+      config.theme = themePresets[presetName] || DEFAULT_THEME
     }
 
     return config

@@ -39,16 +39,20 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   await mkdir(slidesDir, { recursive: true });
   await writeFile(join(slidesDir, '.gitkeep'), '');
 
-  // Create deck.config.ts
-  const configContent = `import { defineConfig } from 'term-deck'
-import matrix from '@term-deck/theme-matrix'
-
-export default defineConfig({
+  // Create deck.config.js
+  const configContent = `export default {
   title: '${name}',
-  theme: matrix,
-})
+  // Uncomment to use a custom theme:
+  // theme: {
+  //   colors: {
+  //     primary: '#00ff00',
+  //     secondary: '#00ffff',
+  //     background: '#000000',
+  //   },
+  // },
+}
 `;
-  await writeFile(join(slidesDir, 'deck.config.ts'), configContent);
+  await writeFile(join(slidesDir, 'deck.config.js'), configContent);
 
   // Create sample slides
   const slide1 = `---

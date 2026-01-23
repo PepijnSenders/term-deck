@@ -71,31 +71,48 @@ export async function findSlideFiles(dir: string): Promise<SlideFile[]> {
 }
 
 /**
- * Load deck configuration from deck.config.ts in slides directory.
+ * Load deck configuration from deck.config.js or deck.config.ts in slides directory.
  *
- * Looks for a deck.config.ts file in the specified directory.
+ * Looks for a deck.config.js (preferred) or deck.config.ts file in the specified directory.
  * If found, dynamically imports and validates it against DeckConfigSchema.
  * If not found, returns a default config with the DEFAULT_THEME.
  *
- * @param slidesDir - Directory to search for deck.config.ts
+ * @param slidesDir - Directory to search for deck config file
  * @returns Validated DeckConfig object
  * @throws {ValidationError} If config file exists but fails validation
  */
 export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
-  const configPath = join(slidesDir, 'deck.config.ts')
+  // Try .js first (preferred for Node.js compatibility), then .ts (for dev with tsx)
+  const configPaths = [
+    { path: join(slidesDir, 'deck.config.js'), name: 'deck.config.js' },
+    { path: join(slidesDir, 'deck.config.ts'), name: 'deck.config.ts' },
+  ]
+
+  let configPath: string | null = null
+  let configName = 'deck.config.js'
+
+  // Find which config file exists
+  for (const config of configPaths) {
+    try {
+      await access(config.path)
+      configPath = config.path
+      configName = config.name
+      break
+    } catch {
+      // File doesn't exist, try next
+      continue
+    }
+  }
+
+  // No config file found
+  if (!configPath) {
+    return {
+      theme: DEFAULT_THEME,
+    }
+  }
 
   try {
-    // Check if config file exists
-    try {
-      await access(configPath)
-    } catch {
-      // File doesn't exist, return default config with DEFAULT_THEME
-      return {
-        theme: DEFAULT_THEME,
-      }
-    }
-
-    // Dynamic import of TypeScript config
+    // Dynamic import of config
     // Add cache buster to prevent module caching in tests only
     // In production, we want normal module caching behavior
     const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
@@ -103,11 +120,11 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
     const configModule = await import(configPath + cacheBuster)
 
     if (!configModule.default) {
-      throw new Error('deck.config.ts must export default config')
+      throw new Error(`${configName} must export default config`)
     }
 
     // Validate config against schema
-    return safeParse(DeckConfigSchema, configModule.default, 'deck.config.ts')
+    return safeParse(DeckConfigSchema, configModule.default, configName)
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
       // No config file found, use defaults

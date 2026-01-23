@@ -1,4 +1,5 @@
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import fg from 'fast-glob'
 import { access } from 'fs/promises'
 import type { DeckConfig } from '../schemas/config.js'
@@ -113,11 +114,14 @@ export async function loadDeckConfig(slidesDir: string): Promise<DeckConfig> {
 
   try {
     // Dynamic import of config
+    // Convert file path to file:// URL for ES module imports
+    const fileUrl = pathToFileURL(configPath).href
+
     // Add cache buster to prevent module caching in tests only
     // In production, we want normal module caching behavior
     const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
     const cacheBuster = isTest ? `?t=${Date.now()}-${Math.random()}` : ''
-    const configModule = await import(configPath + cacheBuster)
+    const configModule = await import(fileUrl + cacheBuster)
 
     if (!configModule.default) {
       throw new Error(`${configName} must export default config`)

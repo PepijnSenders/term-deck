@@ -5,6 +5,7 @@
  * that can occur during CLI operations.
  */
 
+import { log, cancel } from '@clack/prompts';
 import { ValidationError } from '../schemas/validation.js';
 import { SlideParseError } from '../core/slide.js';
 import { DeckLoadError } from '../core/deck-loader.js';
@@ -16,63 +17,60 @@ import { ThemeError } from '../core/theme.js';
  * Converts various error types into readable console output
  * and exits with appropriate status code.
  */
-export function handleError(error: unknown): never {
-  if (error instanceof ValidationError) {
-    console.error(`\n${error.message}`);
+export function handleError(errorObj: unknown): never {
+  if (errorObj instanceof ValidationError) {
+    log.error(errorObj.message);
     process.exit(1);
   }
 
-  if (error instanceof SlideParseError) {
-    console.error(`\nSlide error in ${error.filePath}:`);
-    console.error(`  ${error.message}`);
-    if (error.cause) {
-      const causeMessage = error.cause instanceof Error ? error.cause.message : String(error.cause);
-      console.error(`  Caused by: ${causeMessage}`);
+  if (errorObj instanceof SlideParseError) {
+    log.error(`Slide error in ${errorObj.filePath}`);
+    log.message(`  ${errorObj.message}`);
+    if (errorObj.cause) {
+      const causeMessage = errorObj.cause instanceof Error
+        ? errorObj.cause.message
+        : String(errorObj.cause);
+      log.message(`  → ${causeMessage}`);
     }
     process.exit(1);
   }
 
-  if (error instanceof DeckLoadError) {
-    console.error(`\nFailed to load deck from ${error.slidesDir}:`);
-    console.error(`  ${error.message}`);
+  if (errorObj instanceof DeckLoadError) {
+    log.error(`Failed to load deck from ${errorObj.slidesDir}`);
+    log.message(`  ${errorObj.message}`);
     process.exit(1);
   }
 
-  if (error instanceof ThemeError) {
-    console.error('\nTheme error:');
-    console.error(`  ${error.message}`);
+  if (errorObj instanceof ThemeError) {
+    log.error('Theme error');
+    log.message(`  ${errorObj.message}`);
     process.exit(1);
   }
 
-  if (error instanceof Error) {
-    // Check for common issues
-    if (error.message.includes('ENOENT')) {
-      console.error('\nFile or directory not found.');
-      console.error(`  ${error.message}`);
+  if (errorObj instanceof Error) {
+    if (errorObj.message.includes('ENOENT')) {
+      log.error('File not found');
+      log.message(`  ${errorObj.message}`);
       process.exit(1);
     }
 
-    if (error.message.includes('ffmpeg')) {
-      console.error('\nffmpeg error:');
-      console.error(`  ${error.message}`);
-      console.error('\nMake sure ffmpeg is installed:');
-      console.error('  macOS: brew install ffmpeg');
-      console.error('  Ubuntu: sudo apt install ffmpeg');
+    if (errorObj.message.includes('ffmpeg')) {
+      log.error('ffmpeg not found');
+      log.message(`  ${errorObj.message}`);
+      log.info('Installation:');
+      log.message('  macOS:  brew install ffmpeg');
+      log.message('  Ubuntu: sudo apt install ffmpeg');
       process.exit(1);
     }
 
-    // Generic error
-    console.error(`\nError: ${error.message}`);
-
+    log.error(errorObj.message);
     if (process.env.DEBUG) {
-      console.error(error.stack);
+      console.error('\n' + errorObj.stack);
     }
-
     process.exit(1);
   }
 
-  // Unknown error
-  console.error('\nUnknown error occurred');
-  console.error(error);
+  log.error('Unknown error occurred');
+  console.error(String(errorObj));
   process.exit(1);
 }

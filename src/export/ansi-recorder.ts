@@ -9,6 +9,7 @@
  */
 
 import { writeFile } from 'fs/promises';
+import { intro, outro, log, spinner } from '@clack/prompts';
 import { loadDeck } from '../core/deck-loader.js';
 import { createRenderer, destroyRenderer, renderSlide } from '../renderer/screen.js';
 import { setScreenDimensions } from '../renderer/types/screen.js';
@@ -42,11 +43,14 @@ export async function recordAnsi(
   output: string,
   options: AnsiRecordOptions = {}
 ): Promise<void> {
+  intro('term-deck record');
+
   // Load deck
   const deck = await loadDeck(slidesDir);
 
   if (deck.slides.length === 0) {
-    throw new Error(`No slides found in ${slidesDir}`);
+    log.error(`No slides found in ${slidesDir}`);
+    process.exit(1);
   }
 
   // Create renderer (headless mode)
@@ -61,12 +65,13 @@ export async function recordAnsi(
   const frames: AsciicastFrame[] = [];
   let currentTime = 0;
 
-  console.log(`Recording ${deck.slides.length} slides to asciicast format...`);
+  const s = spinner();
+  s.start(`Recording ${deck.slides.length} slides`);
 
   try {
     for (let i = 0; i < deck.slides.length; i++) {
       const slide = deck.slides[i];
-      console.log(`  Slide ${i + 1}/${deck.slides.length}: ${slide.frontmatter.title}`);
+      s.message(`Slide ${i + 1}/${deck.slides.length}: ${slide.frontmatter.title}`);
 
       // Render slide
       await renderSlide(renderer, slide);
@@ -78,6 +83,8 @@ export async function recordAnsi(
       frames.push([currentTime, 'o', content]);
       currentTime += slideTime;
     }
+
+    s.stop('Recording complete');
 
     // Write asciicast file
     const header: AsciicastHeader = {
@@ -96,8 +103,8 @@ export async function recordAnsi(
 
     await writeFile(output, lines.join('\n') + '\n');
 
-    console.log(`Recorded to ${output}`);
-    console.log(`Play with: asciinema play ${output}`);
+    log.success(`Recorded to ${output}`);
+    outro(`Play with: asciinema play ${output}`);
   } finally {
     destroyRenderer(renderer);
   }

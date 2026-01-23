@@ -6,6 +6,7 @@
  */
 
 import { join } from 'path';
+import { intro, outro, log, spinner } from '@clack/prompts';
 import { loadDeck } from '../core/deck-loader.js';
 import { createRenderer, destroyRenderer, renderSlide } from '../renderer/screen.js';
 import { setScreenDimensions } from '../renderer/types/screen.js';
@@ -52,6 +53,8 @@ export async function exportPresentation(
   slidesDir: string,
   options: ExportOptions
 ): Promise<void> {
+  intro('term-deck export');
+
   // Check ffmpeg is available
   await checkFfmpeg();
 
@@ -62,7 +65,8 @@ export async function exportPresentation(
   const deck = await loadDeck(slidesDir);
 
   if (deck.slides.length === 0) {
-    throw new Error(`No slides found in ${slidesDir}`);
+    log.error(`No slides found in ${slidesDir}`);
+    process.exit(1);
   }
 
   // Create recording session
@@ -80,12 +84,13 @@ export async function exportPresentation(
   const slideTime = options.slideTime ?? 3; // seconds per slide
   const framesPerSlide = session.fps * slideTime;
 
-  console.log(`Exporting ${deck.slides.length} slides...`);
+  const s = spinner();
+  s.start(`Exporting ${deck.slides.length} slides`);
 
   try {
     for (let i = 0; i < deck.slides.length; i++) {
       const slide = deck.slides[i];
-      console.log(`  Slide ${i + 1}/${deck.slides.length}: ${slide.frontmatter.title}`);
+      s.message(`Slide ${i + 1}/${deck.slides.length}: ${slide.frontmatter.title}`);
 
       // Render slide
       await renderSlide(renderer, slide);
@@ -104,8 +109,11 @@ export async function exportPresentation(
       }
     }
 
-    // Encode video
-    console.log('Encoding video...');
+    s.stop('Slides processed');
+
+    const encodeSpinner = spinner();
+    encodeSpinner.start('Encoding video');
+
     await encodeFramesToVideo(
       session.tempDir,
       options.output,
@@ -114,7 +122,9 @@ export async function exportPresentation(
       options.quality
     );
 
-    console.log(`Exported to ${options.output}`);
+    encodeSpinner.stop(`Exported to ${options.output}`);
+
+    outro('Export complete');
   } finally {
     // Cleanup
     destroyRenderer(renderer);

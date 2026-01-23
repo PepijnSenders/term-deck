@@ -7,6 +7,7 @@
 import { Command } from 'commander';
 import { join } from 'node:path';
 import { mkdir, writeFile } from 'fs/promises';
+import { intro, outro, log } from '@clack/prompts';
 import { handleError } from '../errors.js';
 
 export const initCommand = new Command('init')
@@ -15,11 +16,15 @@ export const initCommand = new Command('init')
   .option('-t, --theme <name>', 'Theme to use', 'matrix')
   .action(async (name, options) => {
     try {
+      intro(`Creating ${name}`);
+
       await initDeck(name, options.theme);
-      console.log(`Created deck: ${name}/`);
-      console.log('\nNext steps:');
-      console.log(`  cd ${name}`);
-      console.log('  term-deck present .');
+
+      log.success(`Created ${name}/`);
+      log.step('cd ' + name);
+      log.step('term-deck present .');
+
+      outro('Ready to present!');
     } catch (error) {
       handleError(error);
     }

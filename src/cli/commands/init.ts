@@ -8,6 +8,7 @@ import { Command } from 'commander';
 import { join } from 'node:path';
 import { mkdir, writeFile } from 'fs/promises';
 import { handleError } from '../errors.js';
+import { DEFAULT_THEME } from '../../schemas/theme.js';
 
 export const initCommand = new Command('init')
   .description('Create a new presentation deck')
@@ -40,6 +41,12 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   await writeFile(join(slidesDir, '.gitkeep'), '');
 
   // Create deck.config.js with valid default theme
+  // Use DEFAULT_THEME to ensure schema compliance
+  const themeJson = JSON.stringify(DEFAULT_THEME, null, 2)
+    .split('\n')
+    .map(line => '  ' + line)
+    .join('\n');
+
   const configContent = `// Deck configuration
 // See: https://github.com/PepijnSenders/term-deck
 
@@ -47,25 +54,8 @@ export default {
   title: '${name}',
 
   // Default matrix/cyberpunk theme
-  theme: {
-    name: 'matrix',
-
-    colors: {
-      primary: '#00cc66',
-      accent: '#ff6600',
-      background: '#0a0a0a',
-      text: '#ffffff',
-      muted: '#666666',
-    },
-
-    gradients: {
-      fire: ['#ff6600', '#ff3300', '#ff0066'],
-      cool: ['#00ccff', '#0066ff', '#6600ff'],
-      pink: ['#ff0066', '#ff0099', '#cc00ff'],
-    },
-
-    glyphs: 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789',
-  },
+  // Customize colors, gradients, and animations to your liking
+  theme: ${themeJson},
 }
 `;
   await writeFile(join(slidesDir, 'deck.config.js'), configContent);

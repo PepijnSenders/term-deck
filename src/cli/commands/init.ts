@@ -39,17 +39,33 @@ export async function initDeck(name: string, theme: string): Promise<void> {
   await mkdir(slidesDir, { recursive: true });
   await writeFile(join(slidesDir, '.gitkeep'), '');
 
-  // Create deck.config.js
-  const configContent = `export default {
+  // Create deck.config.js with valid default theme
+  const configContent = `// Deck configuration
+// See: https://github.com/PepijnSenders/term-deck
+
+export default {
   title: '${name}',
-  // Uncomment to use a custom theme:
-  // theme: {
-  //   colors: {
-  //     primary: '#00ff00',
-  //     secondary: '#00ffff',
-  //     background: '#000000',
-  //   },
-  // },
+
+  // Default matrix/cyberpunk theme
+  theme: {
+    name: 'matrix',
+
+    colors: {
+      primary: '#00cc66',
+      accent: '#ff6600',
+      background: '#0a0a0a',
+      text: '#ffffff',
+      muted: '#666666',
+    },
+
+    gradients: {
+      fire: ['#ff6600', '#ff3300', '#ff0066'],
+      cool: ['#00ccff', '#0066ff', '#6600ff'],
+      pink: ['#ff0066', '#ff0099', '#cc00ff'],
+    },
+
+    glyphs: 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789',
+  },
 }
 `;
   await writeFile(join(slidesDir, 'deck.config.js'), configContent);

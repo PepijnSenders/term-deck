@@ -12,13 +12,29 @@ import { presentCommand } from '../src/cli/commands/present.js';
 import { exportCommand } from '../src/cli/commands/export.js';
 import { initCommand } from '../src/cli/commands/init.js';
 import { handleError } from '../src/cli/errors.js';
+import { showHelp, showVersion } from '../src/cli/help.js';
+
+// Check for help/version flags before commander parses
+const args = process.argv.slice(2);
+if (args.includes('-h') || args.includes('--help') || args.length === 0) {
+  // Only show custom help for main command, not subcommands
+  if (!args.some(arg => ['present', 'export', 'init'].includes(arg))) {
+    showHelp();
+    process.exit(0);
+  }
+}
+if (args.includes('-V') || args.includes('--version')) {
+  showVersion(version);
+  process.exit(0);
+}
 
 const program = new Command();
 
 program
   .name('term-deck')
   .description('Terminal presentation tool with a cyberpunk aesthetic')
-  .version(version);
+  .version(version, '-V, --version', 'output the version number')
+  .helpOption('-h, --help', 'display help for command');
 
 // Register commands
 program.addCommand(presentCommand);
@@ -38,7 +54,7 @@ program
         handleError(error);
       }
     } else {
-      program.help();
+      showHelp();
     }
   });
 

@@ -1,6 +1,5 @@
 import type { Presenter } from './types.js';
 import { nextSlide, prevSlide, jumpToSlide } from './navigation.js';
-import { toggleNotesVisibility } from './notes-window.js';
 
 /**
  * Setup keyboard event handlers
@@ -10,7 +9,6 @@ import { toggleNotesVisibility } from './notes-window.js';
  * - Previous slide: Left, Backspace, p
  * - Jump to slide: 0-9
  * - Show slide list: l
- * - Toggle notes visibility: N
  * - Quit: q, Ctrl+C, Escape (handled in present() function)
  *
  * @param presenter - The presenter state
@@ -37,13 +35,6 @@ export function setupControls(presenter: Presenter): void {
   // Show slide list: l
   screen.key(['l'], () => {
     showSlideList(presenter);
-  });
-
-  // Toggle notes visibility: N (only if notes window exists)
-  screen.key(['N'], () => {
-    if (presenter.notesWindow) {
-      toggleNotesVisibility(presenter.notesWindow);
-    }
   });
 
   // Note: quit keys (q, Ctrl+C, Escape) are handled in the present() function

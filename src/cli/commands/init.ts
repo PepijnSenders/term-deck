@@ -83,6 +83,12 @@ gradient: fire
 {GREEN}Welcome to your presentation{/}
 
 Press {CYAN}Space{/} or {CYAN}→{/} to advance
+
+<!-- notes -->
+Welcome the audience and introduce yourself.
+This is your opening slide - make it count!
+
+Tip: Use --notes --notes-tty to see these notes in a separate terminal.
 `;
 
   const slide2 = `---
@@ -98,7 +104,12 @@ gradient: cool
 - Point three
 
 <!-- notes -->
-Remember to explain each point clearly.
+Key talking points:
+- Explain point one in detail
+- Point two builds on point one
+- Point three is the conclusion
+
+Remember to make eye contact with the audience!
 `;
 
   const slide3 = `---
@@ -110,6 +121,14 @@ gradient: pink
 {ORANGE}Thank you!{/}
 
 Press {CYAN}q{/} to exit
+
+<!-- notes -->
+Wrap up your presentation:
+- Summarize the main points
+- Thank the audience
+- Open for questions
+
+Don't forget to share your contact info!
 `;
 
   await writeFile(join(deckDir, '01-intro.md'), slide1);

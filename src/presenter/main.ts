@@ -53,7 +53,13 @@ export async function present(
 
   // Setup notes window if requested
   if (options.showNotes) {
-    presenter.notesWindow = await createNotesWindow(options.notesTty);
+    try {
+      presenter.notesWindow = await createNotesWindow(options.notesTty);
+    } catch (error) {
+      // Clean up renderer before throwing
+      destroyRenderer(renderer);
+      throw error;
+    }
   }
 
   // Setup progress bar if enabled

@@ -101,7 +101,8 @@ Run `term-deck --help` to see the styled help:
 
   present <dir>        Start a presentation
     -s, --start <n>       Start at slide number
-    -n, --notes           Show presenter notes
+    -n, --notes           Show presenter notes (requires --notes-tty)
+    --notes-tty <path>    TTY for notes (e.g., /dev/ttys001)
     -l, --loop            Loop back after last slide
 
   export <dir>         Export to GIF or MP4
@@ -319,19 +320,22 @@ title: My Slide
 Content visible to audience...
 
 <!-- notes -->
-These notes are only visible when using -n flag.
+These notes are only visible in the notes window.
 Remember to mention the key points!
 ```
 
 Run with notes in a separate terminal:
 
 ```bash
-# Terminal 1: Main presentation
-term-deck present .
+# Step 1: Open a second terminal and get its TTY path
+tty
+# Output: /dev/ttys001 (or similar)
 
-# Terminal 2: Notes view
-term-deck present . --notes
+# Step 2: In your main terminal, start presenting with notes
+term-deck present . --notes --notes-tty /dev/ttys001
 ```
+
+The notes will appear in the second terminal while you present in the first.
 
 ## Examples
 

@@ -1,5 +1,6 @@
 import blessed from 'neo-blessed';
 import { access } from 'fs/promises';
+import { createReadStream, createWriteStream } from 'node:fs';
 import type { Slide } from '../schemas/slide.js';
 
 /**
@@ -15,35 +16,17 @@ export interface NotesWindow {
 }
 
 /**
- * Find an available TTY for notes window
- *
- * This is a best-effort approach - user should specify with --notes-tty.
- * Searches common TTY paths on macOS and Linux.
- *
- * @returns Promise resolving to an available TTY path
- * @throws Error if no available TTY is found
+ * Get error message for missing TTY
  */
-async function findAvailableTty(): Promise<string> {
-  const candidates = [
-    '/dev/ttys001',
-    '/dev/ttys002',
-    '/dev/ttys003',
-    '/dev/pts/1',
-    '/dev/pts/2',
-  ];
-
-  for (const tty of candidates) {
-    try {
-      await access(tty);
-      return tty;
-    } catch {
-      // Continue to next candidate
-    }
-  }
-
-  throw new Error(
-    'Could not find available TTY for notes window. ' +
-    'Open a second terminal, run `tty`, and pass the path with --notes-tty'
+function getMissingTtyError(): string {
+  return (
+    'The --notes flag requires --notes-tty to specify which terminal to use.\n\n' +
+    'How to use presenter notes:\n' +
+    '  1. Open a second terminal window\n' +
+    '  2. In that terminal, run: tty\n' +
+    '  3. Copy the path shown (e.g., /dev/ttys001)\n' +
+    '  4. Run: term-deck present . --notes --notes-tty /dev/ttys001\n\n' +
+    'The notes will appear in the second terminal while you present in the first.'
   );
 }
 
@@ -51,35 +34,59 @@ async function findAvailableTty(): Promise<string> {
  * Create notes window on a separate TTY
  *
  * Creates a blessed screen on a different TTY device for displaying presenter notes.
- * If no TTY is specified, attempts to find one automatically.
+ * Requires the TTY path to be explicitly specified.
  *
  * Usage: Open a second terminal and run `tty` to get the device path,
  * then pass it with --notes-tty /dev/ttys001
  *
- * @param ttyPath - Optional TTY device path (e.g., '/dev/ttys001')
+ * @param ttyPath - TTY device path (e.g., '/dev/ttys001') - REQUIRED
  * @returns Promise resolving to the created notes window
+ * @throws Error if ttyPath is not provided or TTY cannot be opened
  *
  * @example
  * ```typescript
- * // With explicit TTY path
  * const notesWindow = await createNotesWindow('/dev/ttys001');
- *
- * // Auto-detect TTY
- * const notesWindow = await createNotesWindow();
  * ```
  */
 export async function createNotesWindow(ttyPath?: string): Promise<NotesWindow> {
-  const blessed = (await import('neo-blessed')).default;
-  const { openSync } = await import('node:fs');
+  if (!ttyPath) {
+    throw new Error(getMissingTtyError());
+  }
 
-  const tty = ttyPath ?? await findAvailableTty();
+  const blessed = (await import('neo-blessed')).default;
+
+  // Verify TTY exists
+  try {
+    await access(ttyPath);
+  } catch {
+    throw new Error(`TTY not found: ${ttyPath}\n\nMake sure the path is correct and the terminal is open.`);
+  }
+
+  // Create proper streams for the TTY
+  const input = createReadStream(ttyPath);
+  const output = createWriteStream(ttyPath);
+
+  // Wait for streams to be ready
+  await new Promise<void>((resolve, reject) => {
+    let ready = 0;
+    const checkReady = () => {
+      ready++;
+      if (ready === 2) resolve();
+    };
+    input.once('open', checkReady);
+    output.once('open', checkReady);
+    input.once('error', reject);
+    output.once('error', reject);
+  });
 
   const screen = blessed.screen({
     smartCSR: true,
     title: 'term-deck notes',
     fullUnicode: true,
-    input: openSync(tty, 'r'),
-    output: openSync(tty, 'w'),
+    input: input,
+    output: output,
+    terminal: 'xterm-256color',
+    forceUnicode: true,
   });
 
   const contentBox = blessed.box({
@@ -101,7 +108,7 @@ export async function createNotesWindow(ttyPath?: string): Promise<NotesWindow> 
   return {
     screen,
     contentBox,
-    tty,
+    tty: ttyPath,
   };
 }
 
@@ -179,5 +186,12 @@ export function toggleNotesVisibility(notesWindow: NotesWindow): void {
  * @param notesWindow - The notes window to destroy
  */
 export function destroyNotesWindow(notesWindow: NotesWindow): void {
-  notesWindow.screen.destroy();
+  try {
+    // Check if screen and program are properly initialized before destroying
+    if (notesWindow.screen && notesWindow.screen.program) {
+      notesWindow.screen.destroy();
+    }
+  } catch {
+    // Ignore errors during cleanup
+  }
 }

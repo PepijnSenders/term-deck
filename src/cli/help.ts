@@ -48,7 +48,8 @@ export function showHelp(): void {
   console.log('');
   console.log(pc.green('  present') + pc.dim(' <dir>        ') + pc.white('Start a presentation'));
   console.log(pc.dim('    -s, --start <n>       ') + pc.white('Start at slide number'));
-  console.log(pc.dim('    -n, --notes           ') + pc.white('Show presenter notes'));
+  console.log(pc.dim('    -n, --notes           ') + pc.white('Show presenter notes (requires --notes-tty)'));
+  console.log(pc.dim('    --notes-tty <path>    ') + pc.white('TTY for notes (e.g., /dev/ttys001)'));
   console.log(pc.dim('    -l, --loop            ') + pc.white('Loop back after last slide'));
   console.log('');
   console.log(pc.green('  export') + pc.dim(' <dir>         ') + pc.white('Export to GIF or MP4'));

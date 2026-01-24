@@ -1,6 +1,6 @@
 {
   "name": "@pep/term-deck",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Terminal presentation tool with a cyberpunk aesthetic",
   "type": "module",
   "bin": {
@@ -57,6 +57,7 @@
     "gray-matter": "^4.0.3",
     "mermaid-ascii": "^1.0.0",
     "neo-blessed": "^0.2.0",
+    "picocolors": "^1.1.1",
     "yaml": "^2.7.0",
     "zod": "^3.22.4"
   },

@@ -30,7 +30,9 @@ export async function generateBigText(
 
   const result = figlet.textSync(text, { font })
   if (!result) {
-    throw new Error('Failed to generate figlet text')
+    // Figlet can't render non-ASCII characters, return plain text with gradient
+    const gradientFn = gradient(gradientColors)
+    return gradientFn(text)
   }
 
   // Apply gradient

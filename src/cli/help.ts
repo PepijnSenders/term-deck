@@ -63,6 +63,11 @@ export function showHelp(): void {
   console.log(pc.green('  init') + pc.dim(' <name>          ') + pc.white('Create a new presentation deck'));
   console.log(pc.dim('    -t, --theme <name>    ') + pc.white('Theme preset (default: matrix)'));
   console.log('');
+  console.log(pc.green('  play') + pc.dim(' <url>           ') + pc.white('Play a deck from term-deck web'));
+  console.log(pc.dim('    -s, --start <n>       ') + pc.white('Start at slide number'));
+  console.log(pc.dim('    -n, --notes           ') + pc.white('Show presenter notes'));
+  console.log(pc.dim('    -l, --loop            ') + pc.white('Loop back after last slide'));
+  console.log('');
 
   // Hotkeys
   console.log(pc.bold(pc.cyan('▶ HOTKEYS:')));

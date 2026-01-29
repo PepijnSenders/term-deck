@@ -1,6 +1,6 @@
 # term-deck
 
-A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful slideshows in your terminal with matrix rain backgrounds, glitch effects, and ASCII art.
+A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful slideshows in your terminal with matrix rain backgrounds, glitch effects, and ASCII art. Share them on the web or play them anywhere.
 
 ![npm version](https://img.shields.io/npm/v/@pep/term-deck?color=green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
@@ -11,6 +11,8 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 ![term-deck demo](./demo.gif)
 
 *Matrix rain backgrounds, glitch animations, and ASCII art in your terminal*
+
+**Try it online:** [term-deck-web.vercel.app](https://term-deck-web.vercel.app)
 
 ## Features
 
@@ -26,6 +28,7 @@ A terminal-based presentation tool with a cyberpunk aesthetic. Create beautiful 
 - 🔧 **Fully Themeable** - Create custom themes
 - ⚡ **Beautiful CLI** - Colorful, styled terminal output
 - 📦 **Type-Safe** - Full TypeScript with Zod validation
+- 🌐 **Web Platform** - Share decks online and play from URLs
 
 ## Installation
 
@@ -52,6 +55,9 @@ term-deck present .
 
 # Export to video
 term-deck export . -o presentation.mp4
+
+# Play a shared deck from the web
+npx @pep/term-deck play https://term-deck-web.vercel.app/d/demo
 ```
 
 Output:
@@ -115,6 +121,11 @@ Run `term-deck --help` to see the styled help:
 
   init <name>          Create a new presentation deck
     -t, --theme <name>    Theme preset (default: matrix)
+
+  play <url>           Play a deck from term-deck web
+    -s, --start <n>       Start at slide number
+    -n, --notes           Show presenter notes
+    -l, --loop            Loop back after last slide
 
 ▶ HOTKEYS:
 
@@ -263,6 +274,35 @@ term-deck record . -o presentation.cast
 # Play back
 asciinema play presentation.cast
 ```
+
+## Web Platform
+
+Share your presentations online at [term-deck-web.vercel.app](https://term-deck-web.vercel.app).
+
+### Upload & Share
+
+1. Go to [term-deck-web.vercel.app/upload](https://term-deck-web.vercel.app/upload)
+2. Drag and drop your markdown slides
+3. Get a shareable URL like `term-deck-web.vercel.app/d/abc123`
+
+### Play from URL
+
+Anyone can play a shared deck in their terminal:
+
+```bash
+# Play a shared presentation
+npx @pep/term-deck play https://term-deck-web.vercel.app/d/abc123
+
+# With options
+npx @pep/term-deck play https://term-deck-web.vercel.app/d/abc123 --notes --loop
+```
+
+The web viewer includes:
+- Matrix rain background
+- Keyboard navigation (arrows, space, numbers)
+- Fullscreen mode (F key)
+- Slide list (L key)
+- All transition effects (glitch, fade, typewriter)
 
 ## Themes
 

@@ -11,6 +11,7 @@ import { version } from '../package.json';
 import { presentCommand } from '../src/cli/commands/present.js';
 import { exportCommand } from '../src/cli/commands/export.js';
 import { initCommand } from '../src/cli/commands/init.js';
+import { playCommand } from '../src/cli/commands/play.js';
 import { handleError } from '../src/cli/errors.js';
 import { showHelp, showVersion } from '../src/cli/help.js';
 
@@ -18,7 +19,7 @@ import { showHelp, showVersion } from '../src/cli/help.js';
 const args = process.argv.slice(2);
 if (args.includes('-h') || args.includes('--help') || args.length === 0) {
   // Only show custom help for main command, not subcommands
-  if (!args.some(arg => ['present', 'export', 'init'].includes(arg))) {
+  if (!args.some(arg => ['present', 'export', 'init', 'play'].includes(arg))) {
     showHelp();
     process.exit(0);
   }
@@ -40,6 +41,7 @@ program
 program.addCommand(presentCommand);
 program.addCommand(exportCommand);
 program.addCommand(initCommand);
+program.addCommand(playCommand);
 
 // Default action: present if directory given, else show help
 program

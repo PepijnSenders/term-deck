@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cyber-bg text-white font-mono;
+  }
+}
+
+@layer components {
+  .cyber-window {
+    @apply border border-cyber-green bg-cyber-bg/90 backdrop-blur-sm;
+    box-shadow:
+      0 0 0 1px rgba(0, 204, 102, 0.3),
+      0 0 20px rgba(0, 204, 102, 0.1),
+      inset 0 0 60px rgba(0, 204, 102, 0.05);
+  }
+
+  .cyber-button {
+    @apply px-6 py-3 border border-cyber-green text-cyber-green
+           hover:bg-cyber-green hover:text-black transition-all duration-200
+           font-mono uppercase tracking-wider;
+  }
+
+  .cyber-button-orange {
+    @apply px-6 py-3 border border-cyber-orange text-cyber-orange
+           hover:bg-cyber-orange hover:text-black transition-all duration-200
+           font-mono uppercase tracking-wider;
+  }
+
+  .neon-text {
+    text-shadow:
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor;
+  }
+
+  .scanlines::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  }
+
+  .slide-content {
+    @apply whitespace-pre-wrap;
+  }
+
+  .color-green { color: #00cc66; }
+  .color-orange { color: #ff6600; }
+  .color-cyan { color: #00ccff; }
+  .color-pink { color: #ff0066; }
+  .color-white { color: #ffffff; }
+  .color-gray { color: #666666; }
+  .color-primary { color: var(--color-primary, #00cc66); }
+  .color-secondary { color: var(--color-secondary, #00cc66); }
+  .color-accent { color: var(--color-accent, #ff6600); }
+  .color-muted { color: var(--color-muted, #666666); }
+  .color-text { color: var(--color-text, #ffffff); }
+  .color-background { color: var(--color-background, #0a0a0a); }
+}
+
+/* ASCII art / figlet styling */
+.bigtext {
+  @apply whitespace-pre font-mono leading-none;
+}
+
+.bigtext-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-0.5 bg-cyber-green/20;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-cyber-green transition-all duration-300;
+}
+
+/* Slide list modal */
+.slide-list-modal {
+  @apply fixed inset-0 bg-black/80 flex items-center justify-center z-50;
+}
+
+.slide-list-content {
+  @apply cyber-window p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto;
+}
+
+.slide-list-item {
+  @apply px-4 py-2 hover:bg-cyber-green/10 cursor-pointer flex items-center gap-4;
+}
+
+.slide-list-item.active {
+  @apply bg-cyber-green/20 text-cyber-green;
+}
+
+/* Upload zone */
+.upload-zone {
+  @apply border-2 border-dashed border-cyber-green/30 p-12 text-center
+         hover:border-cyber-green/60 hover:bg-cyber-green/5 transition-all duration-200
+         cursor-pointer;
+}
+
+.upload-zone.dragging {
+  @apply border-cyber-green bg-cyber-green/10;
+}
+
+/* Glitch effect on hover */
+.glitch-hover:hover {
+  animation: glitch 0.3s ease-in-out;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}

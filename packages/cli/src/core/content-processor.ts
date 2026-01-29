@@ -51,6 +51,51 @@ export function processCodeBlocks(content: string): string {
 }
 
 /**
+ * Process markdown inline formatting.
+ *
+ * Converts common markdown syntax to blessed tags:
+ * - **bold** or __bold__ → {bold}bold{/bold}
+ * - *italic* or _italic_ → {italic}italic{/italic} (rendered as dim in terminal)
+ * - `code` → {inverse}code{/inverse}
+ * - ~~strikethrough~~ → {strikethrough}text{/strikethrough}
+ *
+ * @param content - The content containing markdown formatting
+ * @returns Content with markdown converted to blessed tags
+ */
+export function processMarkdownInline(content: string): string {
+  let result = content
+
+  // Bold: **text** or __text__ (process before italic to avoid conflicts)
+  result = result.replace(/\*\*([^*]+)\*\*/g, '{bold}$1{/bold}')
+  result = result.replace(/__([^_]+)__/g, '{bold}$1{/bold}')
+
+  // Italic: *text* or _text_ (single asterisk/underscore, not inside words)
+  // Use negative lookbehind/ahead to avoid matching inside words
+  result = result.replace(/(?<![*\w])\*([^*]+)\*(?![*\w])/g, '{light-black-fg}$1{/light-black-fg}')
+  result = result.replace(/(?<![_\w])_([^_]+)_(?![_\w])/g, '{light-black-fg}$1{/light-black-fg}')
+
+  // Inline code: `code`
+  result = result.replace(/`([^`]+)`/g, '{inverse} $1 {/inverse}')
+
+  // Strikethrough: ~~text~~
+  result = result.replace(/~~([^~]+)~~/g, '{strikethrough}$1{/strikethrough}')
+
+  // Headers: # Header (convert to bold)
+  result = result.replace(/^(#{1,6})\s+(.+)$/gm, '{bold}$2{/bold}')
+
+  // Horizontal rules: --- or *** or ___
+  result = result.replace(/^[-*_]{3,}$/gm, '─'.repeat(40))
+
+  // Lists: - item or * item (preserve but clean up)
+  result = result.replace(/^[\s]*[-*+]\s+/gm, '  • ')
+
+  // Numbered lists: 1. item
+  result = result.replace(/^[\s]*(\d+)\.\s+/gm, '  $1. ')
+
+  return result
+}
+
+/**
  * Process slide body content.
  *
  * Applies the full content processing pipeline:
@@ -78,10 +123,13 @@ export async function processSlideContent(
   // Process mermaid diagrams first
   let processed = processMermaidDiagrams(body)
 
-  // Process generic code blocks
+  // Process generic code blocks (before inline markdown to preserve code content)
   processed = processCodeBlocks(processed)
 
-  // Apply color tokens
+  // Process markdown inline formatting
+  processed = processMarkdownInline(processed)
+
+  // Apply color tokens (last, so they override markdown styling if specified)
   processed = colorTokensToBlessedTags(processed, theme)
 
   return processed

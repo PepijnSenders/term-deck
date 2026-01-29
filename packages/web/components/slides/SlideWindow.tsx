@@ -122,7 +122,7 @@ export function SlideWindow({
 
   return (
     <div
-      className={`cyber-window p-6 w-[75vw] max-w-4xl max-h-[85vh] overflow-y-auto ${isFirstSlide ? 'relative' : 'absolute top-0 left-0'}`}
+      className={`cyber-window flex flex-col w-[75vw] max-w-4xl max-h-[85vh] ${isFirstSlide ? 'relative' : 'absolute top-0 left-0'}`}
       style={{
         borderColor,
         boxShadow: `0 0 10px ${borderColor}40, 0 0 20px ${borderColor}20`,
@@ -130,18 +130,18 @@ export function SlideWindow({
         zIndex: windowIndex,
       }}
     >
-      {/* Window title bar */}
+      {/* Window title bar - outside scroll area */}
       <div
-        className="text-sm mb-4 pb-2 border-b sticky -top-6 bg-cyber-bg/95 -mt-6 -mx-6 px-6 pt-6"
-        style={{ borderColor: `${borderColor}40`, zIndex: 1 }}
+        className="text-sm pb-2 border-b px-6 pt-6 shrink-0"
+        style={{ borderColor: `${borderColor}40` }}
       >
         <span style={{ color: borderColor }}>┌─ </span>
         <span className="text-white">{frontmatter.title}</span>
         <span style={{ color: borderColor }}> ─┐</span>
       </div>
 
-      {/* Window content */}
-      <div className="min-h-[200px]">
+      {/* Window content - scrollable */}
+      <div className="px-6 pb-6 pt-4 overflow-y-auto min-h-[200px] flex-1">
         {renderTransition()}
       </div>
     </div>

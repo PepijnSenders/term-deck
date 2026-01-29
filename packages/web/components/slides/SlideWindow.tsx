@@ -132,7 +132,7 @@ export function SlideWindow({
     >
       {/* Window title bar */}
       <div
-        className="text-sm mb-4 pb-2 border-b sticky top-0 bg-cyber-bg/95 -mt-6 -mx-6 px-6 pt-6"
+        className="text-sm mb-4 pb-2 border-b sticky -top-6 bg-cyber-bg/95 -mt-6 -mx-6 px-6 pt-6"
         style={{ borderColor: `${borderColor}40`, zIndex: 1 }}
       >
         <span style={{ color: borderColor }}>┌─ </span>

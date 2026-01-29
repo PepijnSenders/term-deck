@@ -1,10 +1,9 @@
-import { defineConfig } from '../src/index.js';
-import hacker from '../themes/hacker.js';
+import { defineConfig, hackerTheme } from '@pep/term-deck';
 
 export default defineConfig({
   title: 'term-deck Demo [HACKER]',
   author: 'term-deck',
-  theme: hacker,
+  theme: hackerTheme,
   settings: {
     startSlide: 0,
     loop: false,

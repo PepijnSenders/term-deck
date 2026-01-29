@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getDeck } from '@/lib/storage/blob'
+import { DEMO_DECK } from '@/lib/demo-deck'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -7,6 +8,12 @@ interface RouteParams {
 
 export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params
+
+  // Serve the built-in demo deck
+  if (id === 'demo') {
+    return NextResponse.json(DEMO_DECK)
+  }
+
   const deck = await getDeck(id)
 
   if (!deck) {

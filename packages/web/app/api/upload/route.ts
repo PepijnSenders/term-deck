@@ -3,41 +3,19 @@ import { nanoid } from 'nanoid'
 import { DeckBundleSchema, type DeckBundle } from '@/schemas/deck-bundle'
 import { DEFAULT_THEME } from '@/schemas/theme'
 import { uploadDeck } from '@/lib/storage/blob'
+import {
+  MAX_FILE_SIZE,
+  MAX_TOTAL_SIZE,
+  isAllowedFile,
+  isAllowedMimeType,
+  isValidTextContent,
+} from '@/lib/upload-validation'
 import matter from 'gray-matter'
 
-// Rate limiting: track uploads per IP
-const uploadCounts = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 10 // uploads per hour
-const RATE_WINDOW = 60 * 60 * 1000 // 1 hour in ms
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const record = uploadCounts.get(ip)
-
-  if (!record || now > record.resetAt) {
-    uploadCounts.set(ip, { count: 1, resetAt: now + RATE_WINDOW })
-    return true
-  }
-
-  if (record.count >= RATE_LIMIT) {
-    return false
-  }
-
-  record.count++
-  return true
-}
+// Note: Rate limiting is handled by Vercel WAF (configured in dashboard)
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
-    const ip = request.headers.get('x-forwarded-for') || 'unknown'
-    if (!checkRateLimit(ip)) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Please try again later.' },
-        { status: 429 }
-      )
-    }
-
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
     const title = formData.get('title') as string | null
@@ -50,12 +28,53 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate file types and sizes to prevent malicious uploads and DoS attacks
+    let totalSize = 0
+    for (const file of files) {
+      // Server-side file type validation - don't trust client-side validation
+      // Check both extension and MIME type for defense in depth
+      if (!isAllowedFile(file.name)) {
+        return NextResponse.json(
+          { error: `Invalid file type. Only markdown files (.md, .markdown) are allowed.` },
+          { status: 400 }
+        )
+      }
+      if (!isAllowedMimeType(file.type)) {
+        return NextResponse.json(
+          { error: `Invalid file MIME type "${file.type}". Only text/markdown or text/plain files are allowed.` },
+          { status: 400 }
+        )
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `File "${file.name}" exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+          { status: 400 }
+        )
+      }
+      totalSize += file.size
+    }
+
+    if (totalSize > MAX_TOTAL_SIZE) {
+      return NextResponse.json(
+        { error: `Total upload size exceeds maximum of ${MAX_TOTAL_SIZE / 1024 / 1024}MB` },
+        { status: 400 }
+      )
+    }
+
     // Parse slides from uploaded files
     const slides: DeckBundle['slides'] = []
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       const content = await file.text()
+
+      // SECURITY: Validate content is actually text, not binary masquerading as markdown
+      if (!isValidTextContent(content)) {
+        return NextResponse.json(
+          { error: `File "${file.name}" appears to contain binary data. Only text markdown files are allowed.` },
+          { status: 400 }
+        )
+      }
 
       try {
         const { data, content: body } = matter(content)

@@ -6,9 +6,19 @@ import Link from 'next/link'
 import { MatrixBackground } from '@/components/matrix'
 import { DEFAULT_THEME } from '@/schemas/theme'
 
+const MAX_FILE_SIZE = 1 * 1024 * 1024    // 1MB per file
+const MAX_TOTAL_SIZE = 5 * 1024 * 1024   // 5MB total
+
 interface UploadedFile {
   name: string
   content: string
+  size: number
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export default function UploadPage() {
@@ -22,21 +32,42 @@ export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
+
   const handleFiles = useCallback(async (fileList: FileList) => {
     const newFiles: UploadedFile[] = []
+    const errors: string[] = []
 
     for (const file of Array.from(fileList)) {
       if (file.name.endsWith('.md') || file.name.endsWith('.markdown')) {
+        if (file.size > MAX_FILE_SIZE) {
+          errors.push(`${file.name} exceeds 1MB limit (${formatSize(file.size)})`)
+          continue
+        }
         const content = await file.text()
-        newFiles.push({ name: file.name, content })
+        newFiles.push({ name: file.name, content, size: file.size })
       }
     }
 
-    // Sort by filename
-    newFiles.sort((a, b) => a.name.localeCompare(b.name))
+    if (errors.length > 0) {
+      setError(errors.join(', '))
+      return
+    }
 
-    setFiles((prev) => [...prev, ...newFiles])
-    setError(null)
+    const newTotalSize = newFiles.reduce((sum, f) => sum + f.size, 0)
+
+    setFiles((prev) => {
+      const currentTotal = prev.reduce((sum, f) => sum + f.size, 0)
+      if (currentTotal + newTotalSize > MAX_TOTAL_SIZE) {
+        setError(`Adding these files would exceed 5MB total limit`)
+        return prev
+      }
+      // Sort by filename
+      const combined = [...prev, ...newFiles]
+      combined.sort((a, b) => a.name.localeCompare(b.name))
+      setError(null)
+      return combined
+    })
   }, [])
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
@@ -190,13 +221,16 @@ export default function UploadPage() {
               <div className="text-cyber-muted">
                 or click to select files
               </div>
+              <div className="text-cyber-muted text-sm mt-2">
+                Max 1MB per file, 5MB total
+              </div>
             </div>
 
             {/* File list */}
             {files.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-cyber-muted text-sm mb-2">
-                  Slides ({files.length})
+                  Slides ({files.length}) — {formatSize(totalSize)} / 5 MB
                 </h2>
                 <div className="space-y-2">
                   {files.map((file, index) => (
@@ -206,6 +240,7 @@ export default function UploadPage() {
                     >
                       <span className="text-cyber-muted w-6">{index + 1}.</span>
                       <span className="flex-1 truncate">{file.name}</span>
+                      <span className="text-cyber-muted text-sm">{formatSize(file.size)}</span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => moveFile(index, 'up')}

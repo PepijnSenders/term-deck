@@ -1,10 +1,9 @@
-import { defineConfig } from '../src/index.js';
-import minimal from '../themes/minimal.js';
+import { defineConfig, minimalTheme } from '@pep/term-deck';
 
 export default defineConfig({
   title: 'term-deck Demo [MINIMAL]',
   author: 'term-deck',
-  theme: minimal,
+  theme: minimalTheme,
   settings: {
     startSlide: 0,
     loop: false,

@@ -3,53 +3,16 @@ import { nanoid } from 'nanoid'
 import { DeckBundleSchema, type DeckBundle } from '@/schemas/deck-bundle'
 import { DEFAULT_THEME } from '@/schemas/theme'
 import { uploadDeck } from '@/lib/storage/blob'
+import {
+  MAX_FILE_SIZE,
+  MAX_TOTAL_SIZE,
+  isAllowedFile,
+  isAllowedMimeType,
+  isValidTextContent,
+} from '@/lib/upload-validation'
 import matter from 'gray-matter'
 
 // Note: Rate limiting is handled by Vercel WAF (configured in dashboard)
-
-// File size limits
-const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1MB per file
-const MAX_TOTAL_SIZE = 5 * 1024 * 1024 // 5MB total
-
-// Allowed file extensions (case-insensitive)
-const ALLOWED_EXTENSIONS = ['.md', '.markdown']
-
-// Allowed MIME types for markdown files
-// SECURITY: Do NOT add 'application/octet-stream' - it's overly permissive
-// and would allow any file type to bypass MIME validation
-const ALLOWED_MIME_TYPES = [
-  'text/markdown',
-  'text/x-markdown',
-  'text/plain', // Some systems report .md as text/plain
-]
-
-function isAllowedFile(filename: string): boolean {
-  const lowerName = filename.toLowerCase()
-  return ALLOWED_EXTENSIONS.some(ext => lowerName.endsWith(ext))
-}
-
-function isAllowedMimeType(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.includes(mimeType)
-}
-
-// SECURITY: Validate that content is actually text, not binary data
-// This prevents attacks where a malicious file is renamed to .md
-function isValidTextContent(content: string): boolean {
-  // Check for null bytes which indicate binary content
-  if (content.includes('\0')) {
-    return false
-  }
-  // Check that a reasonable portion of the content is printable ASCII or common unicode
-  // Binary files typically have many unprintable characters
-  const printableRatio = content.split('').filter(char => {
-    const code = char.charCodeAt(0)
-    // Allow: printable ASCII, tabs, newlines, carriage returns, and common unicode
-    return (code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13 || code > 127
-  }).length / content.length
-
-  // Require at least 90% printable characters (markdown files should be nearly 100%)
-  return printableRatio >= 0.9
-}
 
 export async function POST(request: NextRequest) {
   try {

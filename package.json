@@ -1,73 +1,13 @@
 {
-  "name": "@pep/term-deck",
-  "version": "1.1.0",
-  "description": "Terminal presentation tool with a cyberpunk aesthetic",
-  "type": "module",
-  "bin": {
-    "term-deck": "./dist/bin/term-deck.js"
-  },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "name": "term-deck-monorepo",
+  "private": true,
   "scripts": {
-    "dev": "tsx bin/term-deck.ts",
-    "build": "tsup",
-    "prepublishOnly": "pnpm run build",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
-  },
-  "keywords": [
-    "presentation",
-    "terminal",
-    "slides",
-    "cli",
-    "tui",
-    "blessed",
-    "cyberpunk",
-    "markdown"
-  ],
-  "author": "Pepijn Senders",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/PepijnSenders/term-deck.git"
-  },
-  "bugs": {
-    "url": "https://github.com/PepijnSenders/term-deck/issues"
-  },
-  "homepage": "https://github.com/PepijnSenders/term-deck#readme",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "files": [
-    "dist/",
-    "themes/",
-    "examples/",
-    "LICENSE",
-    "README.md"
-  ],
-  "dependencies": {
-    "@clack/prompts": "^0.11.0",
-    "canvas": "^3.2.1",
-    "commander": "^14.0.2",
-    "deepmerge": "^4.3.1",
-    "execa": "^9.6.1",
-    "fast-glob": "^3.3.3",
-    "figlet": "^1.9.4",
-    "gradient-string": "^3.0.0",
-    "gray-matter": "^4.0.3",
-    "mermaid-ascii": "^1.0.0",
-    "neo-blessed": "^0.2.0",
-    "picocolors": "^1.1.1",
-    "yaml": "^2.7.0",
-    "zod": "^3.22.4"
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @pep/term-deck dev",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
-    "@types/figlet": "^1.5.8",
-    "@types/node": "^22.0.0",
-    "madge": "^8.0.0",
-    "tsup": "^8.5.1",
-    "tsx": "^4.19.2",
-    "typescript": "^5.9.3",
-    "vitest": "^2.1.8"
+    "madge": "^8.0.0"
   }
 }

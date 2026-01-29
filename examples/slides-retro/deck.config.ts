@@ -1,10 +1,9 @@
-import { defineConfig } from '../src/index.js';
-import retro from '../themes/retro.js';
+import { defineConfig, retroTheme } from '@pep/term-deck';
 
 export default defineConfig({
   title: 'term-deck Demo [RETRO]',
   author: 'term-deck',
-  theme: retro,
+  theme: retroTheme,
   settings: {
     startSlide: 0,
     loop: false,

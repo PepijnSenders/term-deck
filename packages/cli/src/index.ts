@@ -34,6 +34,10 @@ export type { ThemeObject };
 
 // Re-export built-in themes
 export { default as matrixTheme } from './themes/matrix/index.js';
+export { default as neonTheme } from '../themes/neon.js';
+export { default as retroTheme } from '../themes/retro.js';
+export { default as minimalTheme } from '../themes/minimal.js';
+export { default as hackerTheme } from '../themes/hacker.js';
 
 // Re-export types for consumers
 export type { DeckConfig, Theme, Slide, SlideFrontmatter };

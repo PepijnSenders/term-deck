@@ -15,6 +15,42 @@ import { colorTokensToBlessedTags } from './theme.js'
 import { processMermaidDiagrams } from './utils/mermaid.js'
 
 /**
+ * Pattern to match generic code blocks in markdown.
+ * Captures optional language and the code content.
+ *
+ * Matches: ```language\n<content>``` or ```\n<content>```
+ * Group 1: Optional language identifier
+ * Group 2: The code content
+ */
+const CODE_BLOCK_PATTERN = /```(\w*)\n([\s\S]*?)```/g
+
+/**
+ * Process generic code blocks in content.
+ *
+ * Strips the ``` delimiters and formats code blocks with a simple
+ * box border for visual distinction.
+ *
+ * @param content - The content containing code blocks
+ * @returns Content with code blocks formatted
+ */
+export function processCodeBlocks(content: string): string {
+  return content.replace(CODE_BLOCK_PATTERN, (_match, _lang, code) => {
+    const lines = code.trimEnd().split('\n')
+    const maxLen = Math.max(...lines.map((l: string) => l.length), 20)
+
+    const top = '┌' + '─'.repeat(maxLen + 2) + '┐'
+    const bottom = '└' + '─'.repeat(maxLen + 2) + '┘'
+
+    const boxedLines = lines.map((line: string) => {
+      const padded = line.padEnd(maxLen)
+      return `│ ${padded} │`
+    })
+
+    return [top, ...boxedLines, bottom].join('\n')
+  })
+}
+
+/**
  * Process slide body content.
  *
  * Applies the full content processing pipeline:
@@ -41,6 +77,9 @@ export async function processSlideContent(
 ): Promise<string> {
   // Process mermaid diagrams first
   let processed = processMermaidDiagrams(body)
+
+  // Process generic code blocks
+  processed = processCodeBlocks(processed)
 
   // Apply color tokens
   processed = colorTokensToBlessedTags(processed, theme)

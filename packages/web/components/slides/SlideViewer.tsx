@@ -125,7 +125,7 @@ export function SlideViewer({ deck }: SlideViewerProps) {
   const visibleSlides = slides.slice(0, currentIndex + 1)
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto">
       {/* Matrix rain background */}
       <MatrixBackground theme={theme} />
 

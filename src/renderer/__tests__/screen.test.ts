@@ -1,4 +1,4 @@
-import { describe, it, expect, mock } from 'bun:test'
+import { describe, it, expect, vi } from 'vitest'
 import {
   createScreen,
   createRenderer,
@@ -112,10 +112,10 @@ describe('destroyRenderer', () => {
 
     // Create mock windows
     const mockWindow1 = {
-      destroy: mock(() => {}),
+      destroy: vi.fn(() => {}),
     }
     const mockWindow2 = {
-      destroy: mock(() => {}),
+      destroy: vi.fn(() => {}),
     }
 
     renderer.windowStack = [mockWindow1 as any, mockWindow2 as any]
@@ -132,9 +132,9 @@ describe('destroyRenderer', () => {
 
     // Add mock windows
     renderer.windowStack = [
-      { destroy: mock(() => {}) } as any,
-      { destroy: mock(() => {}) } as any,
-      { destroy: mock(() => {}) } as any,
+      { destroy: vi.fn(() => {}) } as any,
+      { destroy: vi.fn(() => {}) } as any,
+      { destroy: vi.fn(() => {}) } as any,
     ]
 
     destroyRenderer(renderer)
@@ -146,7 +146,7 @@ describe('destroyRenderer', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
     // Mock the screen destroy method
-    const destroySpy = mock(() => {})
+    const destroySpy = vi.fn(() => {})
     renderer.screen.destroy = destroySpy
 
     destroyRenderer(renderer)
@@ -159,9 +159,9 @@ describe('destroyRenderer', () => {
 
     // Set up interval and windows
     renderer.matrixRain.matrixInterval = setInterval(() => {}, 100)
-    const mockWindow = { destroy: mock(() => {}) }
+    const mockWindow = { destroy: vi.fn(() => {}) }
     renderer.windowStack = [mockWindow as any]
-    const screenDestroySpy = mock(() => {})
+    const screenDestroySpy = vi.fn(() => {})
     renderer.screen.destroy = screenDestroySpy
 
     destroyRenderer(renderer)
@@ -332,7 +332,7 @@ describe('glitchLine', () => {
   it('animates a single line with glitch effect', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = renderer.windowStack[0] || {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const currentLines = ['Line 1', 'Line 2']
@@ -350,7 +350,7 @@ describe('glitchLine', () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const contentCalls: string[] = []
     const box = {
-      setContent: mock((content: string) => {
+      setContent: vi.fn((content: string) => {
         contentCalls.push(content)
       }),
     } as any
@@ -373,7 +373,7 @@ describe('glitchLine', () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const contentCalls: string[] = []
     const box = {
-      setContent: mock((content: string) => {
+      setContent: vi.fn((content: string) => {
         contentCalls.push(content)
       }),
     } as any
@@ -394,7 +394,7 @@ describe('glitchLine', () => {
   it('handles empty lines', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const currentLines: string[] = []
@@ -412,7 +412,7 @@ describe('lineByLineReveal', () => {
   it('reveals content line by line', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Line 1\nLine 2\nLine 3'
@@ -437,7 +437,7 @@ describe('lineByLineReveal', () => {
 
     const renderer = createRenderer(customTheme)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Line A\nLine B'
@@ -452,7 +452,7 @@ describe('lineByLineReveal', () => {
   it('handles single line content', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Single line'
@@ -467,7 +467,7 @@ describe('lineByLineReveal', () => {
   it('handles empty content', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = ''
@@ -482,7 +482,7 @@ describe('lineByLineReveal', () => {
   it('skips delay for empty lines', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Line 1\n\nLine 3'
@@ -502,7 +502,7 @@ describe('lineByLineReveal', () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const contentCalls: string[] = []
     const box = {
-      setContent: mock((content: string) => {
+      setContent: vi.fn((content: string) => {
         contentCalls.push(content)
       }),
     } as any

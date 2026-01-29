@@ -2,8 +2,8 @@
  * Tests for init command
  */
 
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { rmSync, existsSync } from 'node:fs';
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { rmSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { initDeck } from '../commands/init.js';
 
@@ -25,42 +25,38 @@ describe('initDeck', () => {
     }
   });
 
-  test('creates deck directory structure', async () => {
+  test('creates deck directory', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    // Check directories
     expect(existsSync(TEST_DECK_PATH)).toBe(true);
-    expect(existsSync(join(TEST_DECK_PATH, 'slides'))).toBe(true);
   });
 
-  test('creates deck.config.ts', async () => {
+  test('creates deck.config.js', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    const configPath = join(TEST_DECK_PATH, 'slides', 'deck.config.ts');
+    const configPath = join(TEST_DECK_PATH, 'deck.config.js');
     expect(existsSync(configPath)).toBe(true);
 
-    const content = await Bun.file(configPath).text();
-    expect(content).toContain('import { defineConfig }');
-    expect(content).toContain('import matrix from');
+    const content = readFileSync(configPath, 'utf-8');
+    expect(content).toContain('export default');
     expect(content).toContain(`title: '${TEST_DECK_NAME}'`);
+    expect(content).toContain('themePreset');
   });
 
   test('creates sample slides', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    const slidesDir = join(TEST_DECK_PATH, 'slides');
-    expect(existsSync(join(slidesDir, '01-intro.md'))).toBe(true);
-    expect(existsSync(join(slidesDir, '02-content.md'))).toBe(true);
-    expect(existsSync(join(slidesDir, '03-end.md'))).toBe(true);
+    expect(existsSync(join(TEST_DECK_PATH, '01-intro.md'))).toBe(true);
+    expect(existsSync(join(TEST_DECK_PATH, '02-content.md'))).toBe(true);
+    expect(existsSync(join(TEST_DECK_PATH, '03-end.md'))).toBe(true);
   });
 
   test('slides have valid frontmatter', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    const slidesDir = join(TEST_DECK_PATH, 'slides');
-    const slide1 = await Bun.file(join(slidesDir, '01-intro.md')).text();
-    const slide2 = await Bun.file(join(slidesDir, '02-content.md')).text();
-    const slide3 = await Bun.file(join(slidesDir, '03-end.md')).text();
+    const slide1 = readFileSync(join(TEST_DECK_PATH, '01-intro.md'), 'utf-8');
+    const slide2 = readFileSync(join(TEST_DECK_PATH, '02-content.md'), 'utf-8');
+    const slide3 = readFileSync(join(TEST_DECK_PATH, '03-end.md'), 'utf-8');
 
     // Check frontmatter structure
     expect(slide1).toMatch(/^---\s*\ntitle:/);
@@ -76,13 +72,16 @@ describe('initDeck', () => {
     expect(slide3).toContain('gradient:');
   });
 
-  test('slide 2 includes presenter notes', async () => {
+  test('slides include presenter notes', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    const slidesDir = join(TEST_DECK_PATH, 'slides');
-    const slide2 = await Bun.file(join(slidesDir, '02-content.md')).text();
+    const slide1 = readFileSync(join(TEST_DECK_PATH, '01-intro.md'), 'utf-8');
+    const slide2 = readFileSync(join(TEST_DECK_PATH, '02-content.md'), 'utf-8');
+    const slide3 = readFileSync(join(TEST_DECK_PATH, '03-end.md'), 'utf-8');
 
+    expect(slide1).toContain('<!-- notes -->');
     expect(slide2).toContain('<!-- notes -->');
+    expect(slide3).toContain('<!-- notes -->');
   });
 
   test('creates README.md', async () => {
@@ -91,7 +90,7 @@ describe('initDeck', () => {
     const readmePath = join(TEST_DECK_PATH, 'README.md');
     expect(existsSync(readmePath)).toBe(true);
 
-    const content = await Bun.file(readmePath).text();
+    const content = readFileSync(readmePath, 'utf-8');
     expect(content).toContain(`# ${TEST_DECK_NAME}`);
     expect(content).toContain('term-deck present');
     expect(content).toContain('term-deck export');
@@ -101,9 +100,10 @@ describe('initDeck', () => {
   test('uses deck name in slide titles', async () => {
     await initDeck(TEST_DECK_NAME, 'matrix');
 
-    const slide1 = await Bun.file(
-      join(TEST_DECK_PATH, 'slides', '01-intro.md'),
-    ).text();
+    const slide1 = readFileSync(
+      join(TEST_DECK_PATH, '01-intro.md'),
+      'utf-8',
+    );
 
     expect(slide1).toContain(TEST_DECK_NAME.toUpperCase());
   });

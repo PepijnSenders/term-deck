@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { z, ZodError } from 'zod'
 import { ValidationError, formatZodError, safeParse } from '../validation'
 
@@ -130,7 +130,7 @@ describe('formatZodError', () => {
     expect(result.success).toBe(false)
     if (!result.success) {
       const formatted = formatZodError(result.error, 'slide frontmatter')
-      expect(formatted).toStartWith('Invalid slide frontmatter:')
+      expect(formatted.startsWith('Invalid slide frontmatter:')).toBe(true)
     }
   })
 })

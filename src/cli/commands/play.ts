@@ -72,7 +72,7 @@ async function fetchDeck(url: string): Promise<DeckBundle> {
     throw new Error(`Failed to fetch deck: ${response.status} ${response.statusText}`)
   }
 
-  return response.json()
+  return response.json() as Promise<DeckBundle>
 }
 
 async function writeTempSlides(deck: DeckBundle): Promise<string> {

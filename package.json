@@ -12,7 +12,7 @@
     "dev": "tsx bin/term-deck.ts",
     "build": "tsup",
     "prepublishOnly": "pnpm run build",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

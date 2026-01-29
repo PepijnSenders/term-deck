@@ -69,7 +69,7 @@ export async function createNotesWindow(ttyPath?: string): Promise<NotesWindow> 
 
   // Wait for stream to be ready
   await new Promise<void>((resolve, reject) => {
-    output.once('open', resolve);
+    output.once('open', () => resolve());
     output.once('error', reject);
   });
 

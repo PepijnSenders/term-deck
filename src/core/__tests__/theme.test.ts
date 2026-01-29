@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import {
   createTheme,
   createGradients,
@@ -12,7 +12,7 @@ import {
 import { loadThemeFromFile, loadThemeFromPackage } from '../theme-loaders'
 import { ValidationError } from '../../schemas/validation'
 import { join } from 'path'
-import { mkdtemp, rm } from 'fs/promises'
+import { mkdtemp, rm, writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 
 const validThemeYaml = `
@@ -323,7 +323,7 @@ describe('loadThemeFromFile', () => {
   describe('loading valid theme files', () => {
     it('loads theme from filesystem path', async () => {
       const themePath = join(tempDir, 'valid-theme.yml')
-      await Bun.write(themePath, validThemeYaml)
+      await writeFile(themePath, validThemeYaml)
 
       const theme = await loadThemeFromFile(themePath)
 
@@ -334,7 +334,7 @@ describe('loadThemeFromFile', () => {
 
     it('returns ThemeObject with extend method', async () => {
       const themePath = join(tempDir, 'theme-with-extend.yml')
-      await Bun.write(themePath, validThemeYaml)
+      await writeFile(themePath, validThemeYaml)
 
       const theme = await loadThemeFromFile(themePath)
 
@@ -347,7 +347,7 @@ describe('loadThemeFromFile', () => {
 
     it('handles absolute paths', async () => {
       const themePath = join(tempDir, 'absolute-path-theme.yml')
-      await Bun.write(themePath, validThemeYaml)
+      await writeFile(themePath, validThemeYaml)
 
       const theme = await loadThemeFromFile(themePath)
       expect(theme.name).toBe('test')
@@ -375,7 +375,7 @@ describe('loadThemeFromFile', () => {
   describe('invalid theme file handling', () => {
     it('throws on invalid YAML syntax', async () => {
       const invalidYamlPath = join(tempDir, 'invalid-yaml.yml')
-      await Bun.write(
+      await writeFile(
         invalidYamlPath,
         `
 name: test
@@ -389,7 +389,7 @@ primary: "#ff0066"
 
     it('throws ValidationError for invalid theme data', async () => {
       const invalidThemePath = join(tempDir, 'invalid-theme.yml')
-      await Bun.write(
+      await writeFile(
         invalidThemePath,
         `
 name: test
@@ -420,7 +420,7 @@ animations:
 
     it('throws ValidationError for missing required fields', async () => {
       const incompleteThemePath = join(tempDir, 'incomplete-theme.yml')
-      await Bun.write(
+      await writeFile(
         incompleteThemePath,
         `
 name: test
@@ -444,16 +444,16 @@ describe('loadThemeFromPackage', () => {
       ).rejects.toThrow('Theme package "@term-deck/non-existent-theme-package" not found')
     })
 
-    it('suggests bun add in error message', async () => {
+    it('suggests npm install in error message', async () => {
       await expect(
         loadThemeFromPackage('@term-deck/non-existent-theme-package')
-      ).rejects.toThrow('bun add @term-deck/non-existent-theme-package')
+      ).rejects.toThrow('npm install @term-deck/non-existent-theme-package')
     })
 
     it('handles unscoped package names', async () => {
       await expect(
         loadThemeFromPackage('term-deck-theme-fake')
-      ).rejects.toThrow('bun add term-deck-theme-fake')
+      ).rejects.toThrow('npm install term-deck-theme-fake')
     })
   })
 

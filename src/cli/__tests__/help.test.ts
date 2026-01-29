@@ -2,7 +2,7 @@
  * Tests for CLI help text
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { Command } from 'commander';
 import { presentCommand } from '../commands/present.js';
 import { exportCommand } from '../commands/export.js';

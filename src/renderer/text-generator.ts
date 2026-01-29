@@ -1,6 +1,16 @@
 import figlet from 'figlet'
 import gradient from 'gradient-string'
 
+import { STANDARD_FONT } from './fonts/index.js'
+
+let fontInitialized = false
+
+function ensureFontInitialized(): void {
+  if (fontInitialized) return
+  figlet.parseFont('Standard', STANDARD_FONT)
+  fontInitialized = true
+}
+
 /**
  * Generate ASCII art text with gradient.
  * Uses figlet to convert text to ASCII art and applies a gradient color effect.
@@ -16,6 +26,7 @@ export async function generateBigText(
   gradientColors: string[],
   font: string = 'Standard'
 ): Promise<string> {
+  ensureFontInitialized()
   return new Promise((resolve, reject) => {
     figlet.text(text, { font }, (err, result) => {
       if (err || !result) {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { DeckConfigSchema, SettingsSchema, ExportSettingsSchema } from '../config'
 
 // Valid theme for testing
@@ -284,9 +284,10 @@ describe('DeckConfigSchema', () => {
   })
 
   describe('theme field', () => {
-    it('requires theme', () => {
+    it('theme is optional (uses themePreset or defaults)', () => {
       const config = { title: 'My Presentation' }
-      expect(() => DeckConfigSchema.parse(config)).toThrow()
+      // Theme is now optional - either themePreset or theme can be used
+      expect(() => DeckConfigSchema.parse(config)).not.toThrow()
     })
 
     it('accepts valid theme', () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { HexColorSchema, GradientSchema, ThemeSchema, ColorTokens, COLOR_TOKEN_PATTERN, PartialThemeSchema, DEFAULT_THEME, type Theme, type ColorToken, type PartialTheme, type DeepPartial } from '../theme'
 
 describe('HexColorSchema', () => {

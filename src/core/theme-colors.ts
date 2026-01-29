@@ -1,5 +1,5 @@
 import gradient from 'gradient-string'
-import type { Theme } from '../schemas/theme'
+import { COLOR_TOKEN_PATTERN, type Theme } from '../schemas/theme'
 
 /**
  * Function type for applying a gradient to text.
@@ -121,8 +121,10 @@ export function resolveColorToken(token: string, theme: Theme): string {
  * // '{#00cc66-fg}Hello{/} {#ff6600-fg}World{/}'
  */
 export function colorTokensToBlessedTags(content: string, theme: Theme): string {
+  // Create a new RegExp instance since global patterns maintain state
+  const pattern = new RegExp(COLOR_TOKEN_PATTERN.source, 'g')
   return content.replace(
-    /\{(GREEN|ORANGE|CYAN|PINK|WHITE|GRAY|PRIMARY|SECONDARY|ACCENT|MUTED|TEXT|BACKGROUND|\/)\}/g,
+    pattern,
     (_, token) => {
       if (token === '/') {
         return '{/}' // Close tag

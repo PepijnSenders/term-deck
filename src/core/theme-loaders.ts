@@ -86,17 +86,17 @@ export async function loadThemeFromPackage(name: string): Promise<ThemeObject> {
     }
   } catch (error) {
     // Handle module not found with helpful message
-    // Bun's module resolution errors are not instanceof Error but have message/code properties
     const err = error as { message?: string; code?: string }
     const isModuleNotFound =
       err.message?.includes('Cannot find package') ||
       err.message?.includes('Cannot find module') ||
+      err.message?.includes('Failed to load url') ||
       err.code === 'MODULE_NOT_FOUND' ||
       err.code === 'ERR_MODULE_NOT_FOUND'
 
     if (isModuleNotFound) {
       throw new Error(
-        `Theme package "${name}" not found. Install it with: bun add ${name}`
+        `Theme package "${name}" not found. Install it with: npm install ${name}`
       )
     }
     throw error

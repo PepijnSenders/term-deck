@@ -1,4 +1,4 @@
-import { describe, it, expect, mock } from 'bun:test'
+import { describe, it, expect, vi } from 'vitest'
 import {
   getWindowColor,
   createWindow,
@@ -259,9 +259,9 @@ describe('clearWindows', () => {
   skipIfNoTTY('destroys all windows in stack', () => {
     const renderer = createRenderer(DEFAULT_THEME)
 
-    const mockWindow1 = { destroy: mock(() => {}) }
-    const mockWindow2 = { destroy: mock(() => {}) }
-    const mockWindow3 = { destroy: mock(() => {}) }
+    const mockWindow1 = { destroy: vi.fn(() => {}) }
+    const mockWindow2 = { destroy: vi.fn(() => {}) }
+    const mockWindow3 = { destroy: vi.fn(() => {}) }
 
     renderer.windowStack = [mockWindow1 as any, mockWindow2 as any, mockWindow3 as any]
 
@@ -521,7 +521,7 @@ describe('applyTransition', () => {
   it('applies instant transition', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Test content'
@@ -536,7 +536,7 @@ describe('applyTransition', () => {
   it('applies glitch transition', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Test glitch'
@@ -552,7 +552,7 @@ describe('applyTransition', () => {
   it('applies fade transition', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Test fade'
@@ -568,7 +568,7 @@ describe('applyTransition', () => {
   it('applies typewriter transition', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Test typewriter'
@@ -584,7 +584,7 @@ describe('applyTransition', () => {
   it('defaults to instant for unknown transition type', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Test default'
@@ -599,7 +599,7 @@ describe('applyTransition', () => {
   it('handles empty content', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
 
@@ -613,7 +613,7 @@ describe('applyTransition', () => {
   it('handles multi-line content', async () => {
     const renderer = createRenderer(DEFAULT_THEME)
     const box = {
-      setContent: mock(() => {}),
+      setContent: vi.fn(() => {}),
     } as any
     const screen = renderer.screen
     const content = 'Line 1\nLine 2\nLine 3'

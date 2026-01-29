@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, spyOn } from 'bun:test';
+import { describe, it, expect, vi } from 'vitest';
 import { jumpToSlide } from '../main';
 import { nextSlide, prevSlide } from '../navigation';
 import type { Presenter } from '../main';

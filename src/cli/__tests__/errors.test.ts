@@ -2,29 +2,42 @@
  * Tests for CLI error handling
  */
 
-import { describe, test, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { handleError } from '../errors.js';
 import { ValidationError } from '../../schemas/validation.js';
 import { SlideParseError } from '../../core/slide.js';
 import { DeckLoadError } from '../../core/deck-loader.js';
 import { ThemeError } from '../../core/theme.js';
 
+// Mock @clack/prompts
+vi.mock('@clack/prompts', () => ({
+  log: {
+    error: vi.fn(),
+    message: vi.fn(),
+    info: vi.fn(),
+  },
+  cancel: vi.fn(),
+}));
+
+import { log } from '@clack/prompts';
+
 describe('handleError', () => {
-  let consoleErrorSpy: ReturnType<typeof spyOn>;
-  let processExitSpy: ReturnType<typeof spyOn>;
+  let processExitSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let originalDebug: string | undefined;
 
   beforeEach(() => {
-    consoleErrorSpy = spyOn(console, 'error').mockImplementation(() => {});
-    processExitSpy = spyOn(process, 'exit').mockImplementation(
+    vi.clearAllMocks();
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation(
       (() => {}) as never,
     );
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     originalDebug = process.env.DEBUG;
   });
 
   afterEach(() => {
-    consoleErrorSpy.mockRestore();
     processExitSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
     process.env.DEBUG = originalDebug;
   });
 
@@ -33,9 +46,7 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid theme configuration'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Invalid theme configuration');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -45,15 +56,9 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('slides/01.md'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid frontmatter'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Missing title field'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Slide error in slides/01.md');
+    expect(log.message).toHaveBeenCalledWith('  Invalid frontmatter');
+    expect(log.message).toHaveBeenCalledWith('  → Missing title field');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -62,9 +67,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('slides/02.md'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Slide error in slides/02.md');
+    expect(log.message).toHaveBeenCalledWith('  Invalid frontmatter');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -73,12 +77,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('./slides'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('No slides found'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Failed to load deck from ./slides');
+    expect(log.message).toHaveBeenCalledWith('  No slides found');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -87,12 +87,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Theme error'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid color format'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Theme error');
+    expect(log.message).toHaveBeenCalledWith('  Invalid color format');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -101,9 +97,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('File or directory not found'),
-    );
+    expect(log.error).toHaveBeenCalledWith('File not found');
+    expect(log.message).toHaveBeenCalledWith('  ENOENT: no such file or directory');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -112,15 +107,11 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('ffmpeg error'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Make sure ffmpeg is installed'),
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('brew install ffmpeg'),
-    );
+    expect(log.error).toHaveBeenCalledWith('ffmpeg not found');
+    expect(log.message).toHaveBeenCalledWith('  ffmpeg not found in PATH');
+    expect(log.info).toHaveBeenCalledWith('Installation:');
+    expect(log.message).toHaveBeenCalledWith('  macOS:  brew install ffmpeg');
+    expect(log.message).toHaveBeenCalledWith('  Ubuntu: sudo apt install ffmpeg');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -129,9 +120,7 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Something went wrong'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Something went wrong');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -155,10 +144,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    // Should show error message
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Regular error'),
-    );
+    // Should show error message via log.error
+    expect(log.error).toHaveBeenCalledWith('Regular error');
 
     // Should NOT show stack trace
     const calls = consoleErrorSpy.mock.calls;
@@ -175,9 +162,8 @@ describe('handleError', () => {
 
     handleError(error);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Unknown error'),
-    );
+    expect(log.error).toHaveBeenCalledWith('Unknown error occurred');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('string error');
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 

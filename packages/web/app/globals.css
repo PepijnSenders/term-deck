@@ -52,6 +52,27 @@
     @apply whitespace-pre-wrap;
   }
 
+  /* Markdown styles in slides */
+  .slide-content code {
+    @apply bg-white/10 px-1.5 py-0.5 rounded text-cyber-green;
+  }
+
+  .slide-content pre.code-block {
+    @apply bg-black/50 border border-white/20 p-4 my-2 rounded overflow-x-auto;
+  }
+
+  .slide-content strong {
+    @apply font-bold text-white;
+  }
+
+  .slide-content em {
+    @apply opacity-70;
+  }
+
+  .slide-content del {
+    @apply line-through opacity-50;
+  }
+
   .color-green { color: #00cc66; }
   .color-orange { color: #ff6600; }
   .color-cyan { color: #00ccff; }

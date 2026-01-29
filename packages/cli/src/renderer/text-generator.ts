@@ -27,18 +27,15 @@ export async function generateBigText(
   font: string = 'Standard'
 ): Promise<string> {
   ensureFontInitialized()
-  return new Promise((resolve, reject) => {
-    figlet.text(text, { font }, (err, result) => {
-      if (err || !result) {
-        reject(err ?? new Error('Failed to generate figlet text'))
-        return
-      }
 
-      // Apply gradient
-      const gradientFn = gradient(gradientColors)
-      resolve(gradientFn(result))
-    })
-  })
+  const result = figlet.textSync(text, { font })
+  if (!result) {
+    throw new Error('Failed to generate figlet text')
+  }
+
+  // Apply gradient
+  const gradientFn = gradient(gradientColors)
+  return gradientFn(result)
 }
 
 /**

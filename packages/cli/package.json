@@ -1,6 +1,6 @@
 {
   "name": "@pep/term-deck",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Terminal presentation tool with a cyberpunk aesthetic",
   "type": "module",
   "bin": {

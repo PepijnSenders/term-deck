@@ -132,7 +132,7 @@ export function SlideWindow({
     >
       {/* Window title bar - outside scroll area */}
       <div
-        className="text-sm pb-2 border-b px-6 pt-6 shrink-0"
+        className="text-sm pb-2 border-b px-6 pt-8 shrink-0"
         style={{ borderColor: `${borderColor}40` }}
       >
         <span style={{ color: borderColor }}>┌─ </span>

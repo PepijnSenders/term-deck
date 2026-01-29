@@ -23,6 +23,21 @@ const WINDOW_COLORS = [
   '#ffcc00', // yellow
 ]
 
+// Seeded random number generator for consistent but random-looking positions
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9999) * 10000
+  return x - Math.floor(x)
+}
+
+// Generate random offset with more variety
+function getRandomOffset(index: number, axis: 'x' | 'y'): number {
+  const seed = index * 137 + (axis === 'x' ? 0 : 73)
+  const random = seededRandom(seed)
+  // Range: -40 to +40 pixels for x, -30 to +30 for y
+  const range = axis === 'x' ? 80 : 60
+  return Math.floor(random * range) - range / 2
+}
+
 export function SlideWindow({
   slide,
   theme,
@@ -33,9 +48,10 @@ export function SlideWindow({
   const borderColor = WINDOW_COLORS[windowIndex % WINDOW_COLORS.length]
   const { frontmatter, body } = slide
 
-  // Generate random-ish offset for stacking effect
-  const offsetX = (windowIndex * 7) % 20
-  const offsetY = (windowIndex * 5) % 15
+  // Generate truly random-looking offsets for stacking effect
+  // First slide stays centered, subsequent slides get random offsets
+  const offsetX = windowIndex === 0 ? 0 : getRandomOffset(windowIndex, 'x')
+  const offsetY = windowIndex === 0 ? 0 : getRandomOffset(windowIndex, 'y')
 
   const renderContent = (displayContent: string, opacity?: number) => {
     const style = opacity !== undefined ? { opacity } : {}
@@ -106,7 +122,7 @@ export function SlideWindow({
 
   return (
     <div
-      className={`cyber-window p-6 w-[75vw] max-w-4xl ${isFirstSlide ? 'relative' : 'absolute top-0 left-0'}`}
+      className={`cyber-window p-6 w-[75vw] max-w-4xl max-h-[85vh] overflow-y-auto ${isFirstSlide ? 'relative' : 'absolute top-0 left-0'}`}
       style={{
         borderColor,
         boxShadow: `0 0 10px ${borderColor}40, 0 0 20px ${borderColor}20`,
@@ -116,8 +132,8 @@ export function SlideWindow({
     >
       {/* Window title bar */}
       <div
-        className="text-sm mb-4 pb-2 border-b"
-        style={{ borderColor: `${borderColor}40` }}
+        className="text-sm mb-4 pb-2 border-b sticky top-0 bg-cyber-bg/95 -mt-6 -mx-6 px-6 pt-6"
+        style={{ borderColor: `${borderColor}40`, zIndex: 1 }}
       >
         <span style={{ color: borderColor }}>┌─ </span>
         <span className="text-white">{frontmatter.title}</span>

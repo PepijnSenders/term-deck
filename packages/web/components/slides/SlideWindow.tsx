@@ -33,8 +33,8 @@ function seededRandom(seed: number): number {
 function getRandomOffset(index: number, axis: 'x' | 'y'): number {
   const seed = index * 137 + (axis === 'x' ? 0 : 73)
   const random = seededRandom(seed)
-  // Range: -40 to +40 pixels for x, -30 to +30 for y
-  const range = axis === 'x' ? 80 : 60
+  // Range: -100 to +100 pixels for x, -60 to +60 for y
+  const range = axis === 'x' ? 200 : 120
   return Math.floor(random * range) - range / 2
 }
 

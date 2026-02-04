@@ -130,7 +130,7 @@ export function SlideViewer({ deck }: SlideViewerProps) {
       <MatrixBackground theme={theme} />
 
       {/* Slide content - stack all visible slides */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex items-start justify-center pt-16 pb-4 px-4">
         <div className="relative">
           {visibleSlides.map((slide, idx) => (
             <SlideWindow

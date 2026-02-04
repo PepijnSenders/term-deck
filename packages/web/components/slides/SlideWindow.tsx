@@ -29,13 +29,54 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x)
 }
 
-// Generate random offset with more variety
-function getRandomOffset(index: number, axis: 'x' | 'y'): number {
-  const seed = index * 137 + (axis === 'x' ? 0 : 73)
+// Estimate content height based on slide content
+function estimateContentHeight(slide: Slide): number {
+  let height = 100 // base padding/chrome
+
+  // BigText adds significant height (ASCII art ~12 lines)
+  if (slide.frontmatter.bigText) {
+    height += 250
+  }
+
+  // Estimate body height: ~24px per line, ~80 chars per line
+  const bodyLines = slide.body.split('\n').length
+  const estimatedWrappedLines = Math.ceil(slide.body.length / 60)
+  height += Math.max(bodyLines, estimatedWrappedLines) * 24
+
+  return height
+}
+
+// Generate random X offset
+function getRandomOffsetX(index: number): number {
+  const seed = index * 137
   const random = seededRandom(seed)
-  // Range: -100 to +100 pixels for x, -60 to +60 for y
-  const range = axis === 'x' ? 200 : 120
-  return Math.floor(random * range) - range / 2
+  // Range: -100 to +100 pixels
+  return Math.floor(random * 200) - 100
+}
+
+// Generate Y offset biased by content height
+// Taller content gets positioned higher (more negative offset)
+function getRandomOffsetY(index: number, contentHeight: number): number {
+  const seed = index * 137 + 73
+  const random = seededRandom(seed)
+
+  // Max viewport height we're designing for
+  const viewportHeight = 800
+  const maxContentHeight = 600
+
+  // Calculate how much space we have below
+  const availableSpace = Math.max(0, viewportHeight - contentHeight)
+
+  // Height ratio: 0 = short content, 1 = tall content
+  const heightRatio = Math.min(1, contentHeight / maxContentHeight)
+
+  // For tall content: bias towards negative (higher on screen)
+  // For short content: allow more randomness
+  const maxDownward = availableSpace * 0.3 * (1 - heightRatio)
+  const maxUpward = 60 * heightRatio + 30
+
+  // Random value biased by height
+  return Math.floor(random * (maxDownward + maxUpward)) - maxUpward
 }
 
 export function SlideWindow({
@@ -48,10 +89,14 @@ export function SlideWindow({
   const borderColor = WINDOW_COLORS[windowIndex % WINDOW_COLORS.length]
   const { frontmatter, body } = slide
 
-  // Generate truly random-looking offsets for stacking effect
+  // Estimate content height for positioning
+  const contentHeight = estimateContentHeight(slide)
+
+  // Generate offsets for stacking effect
   // First slide stays centered, subsequent slides get random offsets
-  const offsetX = windowIndex === 0 ? 0 : getRandomOffset(windowIndex, 'x')
-  const offsetY = windowIndex === 0 ? 0 : getRandomOffset(windowIndex, 'y')
+  // Y offset is biased by content height - taller slides stay higher
+  const offsetX = windowIndex === 0 ? 0 : getRandomOffsetX(windowIndex)
+  const offsetY = windowIndex === 0 ? 0 : getRandomOffsetY(windowIndex, contentHeight)
 
   const renderContent = (displayContent: string, opacity?: number) => {
     const style = opacity !== undefined ? { opacity } : {}
